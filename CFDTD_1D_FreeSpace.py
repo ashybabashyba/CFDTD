@@ -54,7 +54,12 @@ def update(frame):
 
     # Calculate the Ex field
     for k in range(1, ke):
-        ex[k] = ex[k] + cb * (hy[k - 1] - hy[k])
+        if k<=np.floor(kp):
+            ex[k] = ex[k] + cb * (hy[k - 1] - hy[k])
+        elif k>=(ke-1):
+            ex[k] = ex[k] + cb * (hy[k])
+        else:
+            ex[k] = ex[k] + cb * (hy[k] - hy[k+1])
 
     # Put a Gaussian pulse in the middle
     pulse = exp(-0.5 * ((t0 - frame) / spread) ** 2)
@@ -62,13 +67,15 @@ def update(frame):
 
 
     # Calculate the Hy field
-    for k in range(ke - 1):
+    for k in range(1, ke):
         if k==np.floor(kp):
             hy[k] = hy[k] + cb * (ex[k])
         elif k==(np.floor(kp)+1):
-            hy[k] = hy[k] - cb * (ex[k + 1])
-        else:
+            hy[k] = hy[k] - cb * (ex[k])
+        elif k<np.floor(kp):
             hy[k] = hy[k] + cb * (ex[k] - ex[k + 1])
+        elif k>np.floor(kp):
+            hy[k] = hy[k] + cb * (ex[k-1] - ex[k])
 
     # Update the plot data
     line1.set_ydata(ex)
