@@ -14,17 +14,17 @@ hy = np.zeros(ke)
 kp=100.5
 
 # Pulse parameters
-kc = int(ke / 4)
+kc = int(ke / 5)
 t0 = 40
-spread = 12
+spread = 10
 nsteps = 1000
 
 # Spatial and time steps
 epsilon0=1
 mu0=1
 c0=1/np.sqrt(epsilon0*mu0)
-deltax=ke
-deltat=deltax/(2*c0)
+deltax=1
+deltat=deltax/c0*1.0001
 cb=deltat*c0/deltax
 
 
@@ -54,28 +54,16 @@ def update(frame):
 
     # Calculate the Ex field
     for k in range(1, ke):
-        if k<=np.floor(kp):
-            ex[k] = ex[k] + cb * (hy[k - 1] - hy[k])
-        elif k>=(ke-1):
-            ex[k] = ex[k] + cb * (hy[k])
-        else:
-            ex[k] = ex[k] + cb * (hy[k] - hy[k+1])
+        ex[k] = ex[k] + cb * (hy[k - 1] - hy[k])
 
     # Put a Gaussian pulse in the middle
-    pulse = exp(-0.5 * ((t0 - frame) / spread) ** 2)
-    ex[kc] = pulse
+    ex[kc] += deltat*exp(-0.5 * ((t0 - deltat*frame) / spread) ** 2)
+    hy[kc] += deltat*exp(-0.5 * ((t0 - deltat/2 - deltax/2/c0 - deltat*frame) / spread) ** 2)
 
 
     # Calculate the Hy field
-    for k in range(1, ke):
-        if k==np.floor(kp):
-            hy[k] = hy[k] + cb * (ex[k])
-        elif k==(np.floor(kp)+1):
-            hy[k] = hy[k] - cb * (ex[k])
-        elif k<np.floor(kp):
-            hy[k] = hy[k] + cb * (ex[k] - ex[k + 1])
-        elif k>np.floor(kp):
-            hy[k] = hy[k] + cb * (ex[k-1] - ex[k])
+    for k in range(0, ke-1):
+        hy[k] = hy[k] + cb * (ex[k] - ex[k+1])
 
     # Update the plot data
     line1.set_ydata(ex)
