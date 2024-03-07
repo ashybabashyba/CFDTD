@@ -7,21 +7,22 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 ke = 200
+cfl = 1
 ex = np.zeros(ke)
 hy = np.zeros(ke)
 
 # Pulse parameters
-kc = int(ke / 2)
+kc = int(ke / 5)
 t0 = 40
-spread = 12
+spread = 10
 nsteps = 1000
 
 # Spatial and time steps
 epsilon0=1
 mu0=1
 c0=1/np.sqrt(epsilon0*mu0)
-deltax=ke
-deltat=deltax/(2*c0)
+deltax=1
+deltat=deltax/c0*cfl
 cb=deltat*c0/deltax
 
 
@@ -52,8 +53,8 @@ def update(frame):
         ex[k] = ex[k] + cb * (hy[k - 1] - hy[k])
 
     # Put a Gaussian pulse in the middle
-    pulse = exp(-0.5 * ((t0 - frame) / spread) ** 2)
-    ex[kc] = pulse
+    ex[kc] += deltat*exp(-0.5 * ((t0 - deltat*frame) / spread) ** 2)
+    hy[kc] += deltat*exp(-0.5 * ((t0 - deltat/2 - deltax/2/c0 - deltat*frame) / spread) ** 2)
 
 
     # Calculate the Hy field
