@@ -16,6 +16,7 @@ kc = int(ke / 5)
 t0 = 40
 spread = 10
 nsteps = 1000
+
 probeE = np.zeros((ke, nsteps+1))
 probeH = np.zeros((ke, nsteps+1))
 

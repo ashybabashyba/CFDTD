@@ -14,8 +14,8 @@ ex2 = np.zeros(ke)
 hy2 = np.zeros(ke)
 
 # PEC sheet position (in a decimal) and CFL
-kp=119.50
-cfl = 0.4
+kp=119.28
+cfl = 0.9
 
 if kp==np.floor(kp):
     leftover=1
@@ -23,7 +23,7 @@ else:
     leftover=1/(kp-np.floor(kp))
 
 if (cfl*leftover)>1:
-    print("No se satisface la condición de Courant (?)")
+    print("The Courant condition is not satisfied")
 
 # Pulse parameters
 kc = int(ke / 5)
@@ -44,7 +44,7 @@ deltax=1
 deltat=deltax/c0*cfl
 cb=deltat*c0/deltax
 
-# Main CFDTD Loop
+# Main CFDTD and FDTD Loop
 for time_step in range(1, nsteps + 1):
 
     # Calculate the Ex field
@@ -66,7 +66,7 @@ for time_step in range(1, nsteps + 1):
 
 
     # Calculate the Hy field
-    for k in range(1, ke):
+    for k in range(ke-1):
         if k==np.floor(kp):
             hy1[k] = hy1[k] + leftover*cb * (ex1[k])
         elif k<np.floor(kp):

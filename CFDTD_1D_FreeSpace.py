@@ -12,7 +12,7 @@ hy = np.zeros(ke)
 
 # PEC sheet position (in a decimal) and CFL
 kp=100.50
-cfl = 0.6
+cfl = 0.79
 
 if kp==np.floor(kp):
     leftover=1
@@ -20,7 +20,7 @@ else:
     leftover=1/(kp-np.floor(kp))
 
 if (cfl*leftover)>1:
-    print("No se satisface la condición de Courant (?)")
+    print("The Courant condition is not satisfied")
 
 # Pulse parameters
 kc = int(ke / 5)
@@ -47,7 +47,7 @@ for time_step in range(1, nsteps + 1):
         if k<np.floor(kp):
             ex[k] = ex[k] + cb * (hy[k - 1] - hy[k])
         elif k==np.floor(kp):
-            ex[k] = ex[k] + leftover*cb * (hy[k - 1] - hy[k])
+            ex[k] = ex[k] + leftover * cb * (hy[k - 1] - hy[k])
 
 
     # Put a Gaussian pulse in the middle
@@ -56,9 +56,9 @@ for time_step in range(1, nsteps + 1):
 
 
     # Calculate the Hy field
-    for k in range(1, ke):
+    for k in range(ke-1):
         if k==np.floor(kp):
-            hy[k] = hy[k] + leftover*cb * (ex[k])
+            hy[k] = hy[k] + leftover * cb * (ex[k])
         elif k<np.floor(kp):
             hy[k] = hy[k] + cb * (ex[k] - ex[k + 1])
 
