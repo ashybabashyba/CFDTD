@@ -21,6 +21,19 @@ class FDTD1D():
         else:
             self.leftover=1/(kp-np.floor(kp))
 
+    def SpatialMesh(self):
+        kpi = np.floor(self.kp)
+        if self.kp == kpi:
+            N = 1 + (kpi)/self.dx
+            return np.linspace(0, kpi, N)
+        
+        else:
+            N1 = 1 + (kpi)/self.dx
+            V1 = np.linspace(0, kpi, N)
+            V2 = np.array([self.kp])
+            return np.concatenate((V1, V2))
+
+
     def buildFields(self):
         ex = np.zeros(self.ke)
         hy = np.zeros(self.ke)
