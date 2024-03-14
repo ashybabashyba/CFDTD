@@ -15,6 +15,10 @@ class FDTD1D():
         self.dt = self.dx * self.cfl
         self.cb = self.dt/self.dx
 
+    def SpatialMesh(self):
+        N = 1 + (self.ke)/self.dx
+        return np.linspace(0, self.ke, N)
+
     def buildFields(self):
         ex = np.zeros(self.ke)
         hy = np.zeros(self.ke)
