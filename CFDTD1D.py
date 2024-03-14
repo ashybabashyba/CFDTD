@@ -23,15 +23,11 @@ class FDTD1D():
 
     def SpatialMesh(self):
         kpi = np.floor(self.kp)
-        if self.kp == kpi:
-            N = 1 + (kpi)/self.dx
-            return np.linspace(0, kpi, N)
-        
-        else:
-            N1 = 1 + (kpi)/self.dx
-            V1 = np.linspace(0, kpi, N)
-            V2 = np.array([self.kp])
-            return np.concatenate((V1, V2))
+        N1 = 1 + (kpi)/self.dx
+        V1 = np.linspace(0, kpi, N1)
+        V2 = np.array([self.kp])
+
+        return np.concatenate((V1, V2))
 
 
     def buildFields(self):
