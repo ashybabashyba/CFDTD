@@ -17,7 +17,7 @@ class FDTD1D_Class():
 
     def SpatialMesh(self):
         N = 1 + (self.ke)/self.dx
-        return np.linspace(0, self.ke, num=N)
+        return np.linspace(0, self.ke, int(N))
 
     def buildFields(self):
         ex = np.zeros(self.ke)
