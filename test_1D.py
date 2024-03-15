@@ -7,7 +7,7 @@ from CFDTD1D import CFDTD1D_Class
 
 
 Cells = 120
-PEC_sheet = 119.5
+PEC_sheet = 120
 cfl = 0.5
 
 fdtd = FDTD1D_Class(ke=Cells, cfl=cfl, t0=40, spread=10, nsteps=1000)
@@ -19,6 +19,6 @@ def test_mesh_comparative():
     non_conformal_mesh = fdtd.SpatialMesh()
 
     if Cells == PEC_sheet:
-        assert np.linalg.norm(conformal_mesh - non_conformal_mesh) < 1e-6
+        assert np.array_equal(conformal_mesh, non_conformal_mesh)
     else:
         assert (not np.array_equal(conformal_mesh, non_conformal_mesh))
