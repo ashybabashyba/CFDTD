@@ -26,8 +26,10 @@ class CFDTD1D_Class():
         N1 = 1 + (kpi)/self.dx
         V1 = np.linspace(0, kpi, N1)
         V2 = np.array([self.kp])
-
-        return np.concatenate((V1, V2))
+        if kpi == self.kp:
+            return V1
+        else:
+            return np.concatenate((V1, V2))
 
 
     def buildFields(self):
