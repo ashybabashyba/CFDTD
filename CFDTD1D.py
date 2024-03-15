@@ -24,7 +24,7 @@ class CFDTD1D_Class():
     def SpatialMesh(self):
         kpi = np.floor(self.kp)
         N1 = 1 + (kpi)/self.dx
-        V1 = np.linspace(0, kpi, N1)
+        V1 = np.linspace(0, kpi, num=N1)
         V2 = np.array([self.kp])
         if kpi == self.kp:
             return V1
