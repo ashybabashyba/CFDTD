@@ -3,7 +3,7 @@ from math import exp
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-class FDTD1D():
+class FDTD1D_Class():
     def __init__(self, ke, cfl, t0, spread, nsteps):
         self.ke = ke
         self.cfl = cfl
@@ -68,39 +68,39 @@ class FDTD1D():
 
 ## Here below is the comprobation of obtaining the same result as before ## 
 
-fdtd = FDTD1D(ke=200, cfl=1, t0=40, spread=10, nsteps=1000)
-FinalFields = fdtd.FDTDLoop()
-probeE = FinalFields[0]
-probeH = FinalFields[1]
+# fdtd = FDTD1D_Class(ke=200, cfl=1, t0=40, spread=10, nsteps=1000)
+# FinalFields = fdtd.FDTDLoop()
+# probeE = FinalFields[0]
+# probeH = FinalFields[1]
 
 
-# Create a figure and axis for the animation
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
-line1, = ax1.plot(probeE[:,0], color='k', linewidth=1)
-line2, = ax2.plot(probeH[:,0], color='k', linewidth=1)
+# # Create a figure and axis for the animation
+# fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+# line1, = ax1.plot(probeE[:,0], color='k', linewidth=1)
+# line2, = ax2.plot(probeH[:,0], color='k', linewidth=1)
 
-# Function to initialize the plot
-def init():
-    ax1.set_ylabel('E$_x$', fontsize='14')
-    ax1.set_xlim(0, 200)
-    ax1.set_ylim(-1.2, 1.2)
+# # Function to initialize the plot
+# def init():
+#     ax1.set_ylabel('E$_x$', fontsize='14')
+#     ax1.set_xlim(0, 200)
+#     ax1.set_ylim(-1.2, 1.2)
 
-    ax2.set_ylabel('H$_y$', fontsize='14')
-    ax2.set_xlabel('FDTD cells')
-    ax2.set_xlim(0, 200)
-    ax2.set_ylim(-1.2, 1.2)
-    plt.subplots_adjust(bottom=0.2, hspace=0.45)
-    return line1, line2
-
-
-def animate(i):
-    line1.set_ydata(probeE[:,i])
-    line2.set_ydata(probeH[:,i])
-    return line1, line2
+#     ax2.set_ylabel('H$_y$', fontsize='14')
+#     ax2.set_xlabel('FDTD cells')
+#     ax2.set_xlim(0, 200)
+#     ax2.set_ylim(-1.2, 1.2)
+#     plt.subplots_adjust(bottom=0.2, hspace=0.45)
+#     return line1, line2
 
 
-# Create the animation
-ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=10, repeat=False)
+# def animate(i):
+#     line1.set_ydata(probeE[:,i])
+#     line2.set_ydata(probeH[:,i])
+#     return line1, line2
 
-# Show the animation
-plt.show()
+
+# # Create the animation
+# ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=10, repeat=False)
+
+# # Show the animation
+# plt.show()
