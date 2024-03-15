@@ -21,6 +21,9 @@ class CFDTD1D_Class():
         else:
             self.leftover=1/(kp-np.floor(kp))
 
+    def CourantConditionNumber(self):
+        return self.cfl * self.leftover
+
     def SpatialMesh(self):
         kpi = np.floor(self.kp)
         N1 = 1 + (kpi)/self.dx
