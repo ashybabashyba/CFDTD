@@ -2,8 +2,8 @@ import numpy as np
 from math import exp
 from matplotlib import pyplot as plt
 
-from FDTD1D import FDTD1D_Class
-from CFDTD1D import CFDTD1D_Class
+from fdtd.FDTD1D import FDTD1D_Class
+from cfdtd.CFDTD1D import CFDTD1D_Class
 
 
 Cells = 120
