@@ -2,3 +2,4 @@
 .pytest_cache/*
 .vscode/*
 */__pycache__/*
+test/__pycache__/test_1D.cpython-311-pytest-7.4.3.pyc
