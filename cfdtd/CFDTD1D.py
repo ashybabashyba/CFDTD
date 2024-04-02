@@ -3,47 +3,56 @@ from math import exp
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-class CFDTD1D_Class():
-    def __init__(self, ke, kp, cfl, t0, spread, nsteps):
-        self.ke = ke
-        self.kp = kp
+class Mesh():
+    def __init__(self, box_size, dx):
+        kpi = np.floor(box_size)
+                
+        V1 = np.linspace(0, kpi, int(1 + kpi/dx))
+        V2 = np.array([box_size])
+        if kpi == box_size:
+            self.vx = V1
+        else:
+            self.vx = np.concatenate((V1, V2))
+
+    def getDX(self):
+        return self.vx[1] - self.vx[0]
+    
+    def getLength(self):
+        return self.vx[-1]
+    
+    def getLeftover(self):
+        kp = self.getLength()
+        if self.kp==np.floor(kp):
+            return 1.0
+        else:
+            return 1.0 /(kp-np.floor(kp))
+    
+    def numberOfCells(self):
+        return len(self.vx) - 1
+
+
+class CFDTD1D():
+    def __init__(self, mesh, cfl, t0, spread):
+        
+        self.mesh = mesh
+        
         self.cfl = cfl
         self.t0 = t0
         self.spread = spread
-        self.nsteps = nsteps
 
-        self.dx = 1
-        self.dt = self.dx * self.cfl
-        self.cb = self.dt/self.dx
-
-        if self.kp==np.floor(self.kp):
-            self.leftover=1
-        else:
-            self.leftover=1/(kp-np.floor(kp))
-
-    def CourantConditionNumber(self):
-        return self.cfl * self.leftover
-
-    def SpatialMesh(self):
-        kpi = np.floor(self.kp)
-        N1 = 1 + (kpi)/self.dx
-        V1 = np.linspace(0, kpi, int(N1))
-        V2 = np.array([self.kp])
-        if kpi == self.kp:
-            return V1
-        else:
-            return np.concatenate((V1, V2))
-
-
+        self.dt = self.mesh.getDX() * self.cfl
+        self.cb = self.dt/self.mesh.getDX()
+    
     def buildFields(self):
-        ex = np.zeros(self.ke)
-        hy = np.zeros(self.ke)
+        ex = np.zeros(self.mesh.numberOfCells())
+        hy = np.zeros(self.mesh.numberOfCells())
 
         return ex, hy
     
-    def buildFieldsInAllTimeSteps(self):
-        probeE = np.zeros((self.ke, self.nsteps+1))
-        probeH = np.zeros((self.ke, self.nsteps+1))
+    def buildFieldsInAllTimeSteps(self, nsteps):
+        ex, hy = self.buildFields()
+        probeE = np.zeros((len(ex), nsteps))
+        probeH = np.zeros((len(hy), nsteps))
 
         return probeE, probeH
     
@@ -53,31 +62,28 @@ class CFDTD1D_Class():
     def MagneticGaussianPulse(self, time_step):
         return self.dt*exp(-0.5 * ((self.t0 - self.dt/2 - self.dx/2 - self.dt*time_step) / self.spread) ** 2)
     
-    def CFDTDLoop(self):
-        StaticFields = self.buildFields()
-        ex = StaticFields[0]
-        hy = StaticFields[1]
-
-        TimeFields = self.buildFieldsInAllTimeSteps()
-        probeE = TimeFields[0]
-        probeH = TimeFields[1]
-
+    def run(self, nsteps):
+        ex, hy = self.buildFields()
+        probeE, probeH = self.buildFieldsInAllTimeSteps(nsteps)
+        
         kc = int(self.ke / 5)
 
-        for time_step in range(1, self.nsteps + 1):
+        leftover = self.mesh.getLeftover()
 
-            for k in range(1, self.ke):
+        for time_step in range(nsteps):
+
+            for k in range(1, self.numberOfCells()):
                 if k<np.floor(self.kp):
                     ex[k] = ex[k] + self.cb * (hy[k - 1] - hy[k])
                 elif k==np.floor(self.kp):
-                    ex[k] = ex[k] + self.leftover * self.cb * (hy[k - 1] - hy[k])
+                    ex[k] = ex[k] + leftover * self.cb * (hy[k - 1] - hy[k])
 
             ex[kc] += self.ElectricGaussianPulse(time_step)
             hy[kc] += self.MagneticGaussianPulse(time_step)
 
             for k in range(self.ke - 1):
                 if k==np.floor(self.kp):
-                    hy[k] = hy[k] + self.leftover * self.cb * (ex[k])
+                    hy[k] = hy[k] + leftover * self.cb * (ex[k])
                 elif k<np.floor(self.kp):
                     hy[k] = hy[k] + self.cb * (ex[k] - ex[k + 1])
 
