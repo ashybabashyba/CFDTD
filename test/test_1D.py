@@ -11,7 +11,7 @@ cfl = 0.5
 def test_pec_pulse():
     mesh = Mesh(100.0, 1.0)
     pulse = InitialPulse(40, 10)
-    solver = CFDTD1D(mesh, pulse, 1.0)
+    solver = CFDTD1D(mesh, pulse, "Gaussian", 1.0)
     probeE, probeH = solver.run(500)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
@@ -23,12 +23,12 @@ def test_pec_pulse():
     # Function to initialize the plot
     def init():
         ax1.set_ylabel('E$_x$', fontsize='14')
-        ax1.set_xlim(0, 200)
+        ax1.set_xlim(0, 100)
         ax1.set_ylim(-2.2, 2.2)
 
         ax2.set_ylabel('H$_y$', fontsize='14')
         ax2.set_xlabel('FDTD cells')
-        ax2.set_xlim(0, 200)
+        ax2.set_xlim(0, 100)
         ax2.set_ylim(-2.2, 2.2)
         plt.subplots_adjust(bottom=0.2, hspace=0.45)
         return line1, line2
@@ -41,7 +41,7 @@ def test_pec_pulse():
 
 
     # Create the animation
-    ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=2, repeat=False)
+    ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=10, repeat=False)
 
     # Show the animation
     plt.show()

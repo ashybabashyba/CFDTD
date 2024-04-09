@@ -29,6 +29,9 @@ class Mesh():
     
     def numberOfCells(self):
         return len(self.vx) - 1
+    
+    def numberOfNodes(self):
+        return len(self.vx)
 
 class InitialPulse():
     def __init__(self, initial_time, spread):
@@ -47,10 +50,11 @@ class InitialPulse():
         return E0, H0
 
 class CFDTD1D():
-    def __init__(self, mesh, initialPulse, cfl):
+    def __init__(self, mesh, initialPulse, type_of_Pulse, cfl):
         
         self.mesh = mesh
         self.pulse = initialPulse
+        self.type_of_pulse = type_of_Pulse
         
         self.cfl = cfl
         self.t0 = self.pulse.getT0()
@@ -61,8 +65,8 @@ class CFDTD1D():
         self.cb = self.dt/self.dx
     
     def buildFields(self):
-        ex = np.zeros(self.mesh.numberOfCells()+1)
-        hy = np.zeros(self.mesh.numberOfCells()+1)
+        ex = np.zeros(self.mesh.numberOfNodes())
+        hy = np.zeros(self.mesh.numberOfNodes())
 
         return ex, hy
     
@@ -85,18 +89,20 @@ class CFDTD1D():
 
         for time_step in range(nsteps):
 
-            for k in range(1, self.mesh.numberOfCells()):
+            for k in range(1, self.mesh.numberOfNodes()):
                 if k<np.floor(kp):
                     ex[k] = ex[k] + self.cb * (hy[k - 1] - hy[k])
                 elif k==np.floor(kp):
                     ex[k] = ex[k] + leftover * self.cb * (hy[k - 1] - hy[k])
 
-            Wave = self.pulse.gaussianPulse(self.dx, self.dt, time_step)
-            ex[kc] += Wave[0]
-            hy[kc] += Wave[1]
- 
+            if self.type_of_pulse == "Gaussian":
+                Wave = self.pulse.gaussianPulse(self.dx, self.dt, time_step)
+                ex[kc] += Wave[0]
+                hy[kc] += Wave[1]
+            else:
+                raise ValueError("Pulse not defined")
 
-            for k in range(self.ke - 1):
+            for k in range(self.mesh.numberOfNodes()):
                 if k==np.floor(kp):
                     hy[k] = hy[k] + leftover * self.cb * (ex[k])
                 elif k<np.floor(kp):
