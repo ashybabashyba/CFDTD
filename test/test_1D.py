@@ -9,27 +9,27 @@ PEC_sheet = 119.5
 cfl = 0.5
 
 def test_pec_pulse():
-    mesh = Mesh(200.0, 100.5, 1.0)
+    mesh = Mesh(200.0, 200.0, 1.0)
     pulse = InitialPulse(40, 10)
     solver = CFDTD1D(mesh, pulse, "Gaussian", 0.75)
-    probeE, probeH = solver.run(500)
+    probeE, probeH = solver.run(1000)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
     line1, = ax1.plot(probeE[:,0], color='k', linewidth=1)
     line2, = ax2.plot(probeH[:,0], color='k', linewidth=1)
-    ax1.axvline(x=100.5, color='r', linestyle='--', label='kp')
-    ax2.axvline(x=100.5, color='r', linestyle='--', label='kp')
-    ax1.set_title(mesh.getLeftover())
+    ax1.axvline(x=mesh.getPECSheetPosition(), color='r', linestyle='--', label='kp')
+    ax2.axvline(x=mesh.getPECSheetPosition(), color='r', linestyle='--', label='kp')
+    ax1.set_title(mesh.getPECIndexPosition())
 
     # Function to initialize the plot
     def init():
         ax1.set_ylabel('E$_x$', fontsize='14')
-        ax1.set_xlim(0, 200)
+        ax1.set_xlim(0, mesh.getLength())
         ax1.set_ylim(-2.2, 2.2)
 
         ax2.set_ylabel('H$_y$', fontsize='14')
         ax2.set_xlabel('FDTD cells')
-        ax2.set_xlim(0, 200)
+        ax2.set_xlim(0, mesh.getLength())
         ax2.set_ylim(-2.2, 2.2)
         plt.subplots_adjust(bottom=0.2, hspace=0.45)
         return line1, line2
@@ -42,7 +42,7 @@ def test_pec_pulse():
 
 
     # Create the animation
-    ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=5, repeat=False)
+    ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=2.5, repeat=False)
 
     # Show the animation
     plt.show()

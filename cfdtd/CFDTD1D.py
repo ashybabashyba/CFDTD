@@ -33,6 +33,12 @@ class Mesh():
     
     def numberOfNodes(self):
         return len(self.vx)
+    
+    def getPECIndexPosition(self):
+        return np.searchsorted(self.vx, self.kp)
+
+    def getSpatialDiscretization(self):
+        return self.vx
 
 class InitialPulse():
     def __init__(self, initial_time, spread):
@@ -75,7 +81,7 @@ class CFDTD1D():
     
     def buildFields(self):
         ex = np.zeros(self.mesh.numberOfNodes())
-        hy = np.zeros(self.mesh.numberOfNodes())
+        hy = np.zeros(self.mesh.numberOfNodes()-1)
 
         return ex, hy
     
@@ -89,6 +95,7 @@ class CFDTD1D():
     def run(self, nsteps):
         ex, hy = self.buildFields()
         probeE, probeH = self.buildFieldsInAllTimeSteps(nsteps)
+        IndexPEC = self.mesh.getPECIndexPosition()
 
         for time_step in range(nsteps):
             if self.type_of_pulse == "Gaussian":
@@ -96,20 +103,37 @@ class CFDTD1D():
             else:
                 raise ValueError("Pulse not defined")
 
-            for k in range(1, self.mesh.numberOfNodes()):
-                if k<np.floor(self.kp):
-                    ex[k] = ex[k] + self.cb * (hy[k - 1] - hy[k])
-                elif k==np.floor(self.kp):
-                    ex[k] = ex[k] + self.leftover * self.cb * (hy[k - 1] - hy[k])
+            ex[1:IndexPEC-1] += self.cb*(hy[0:IndexPEC-2] - hy[1:IndexPEC-1])
+            ex[IndexPEC-1] += self.leftover * self.cb * (hy[IndexPEC - 2] - hy[IndexPEC-1])
+            if IndexPEC+1 < self.mesh.numberOfNodes()-1:
+                ex[IndexPEC+1] += self.leftover/(self.leftover-1) * self.cb * (hy[IndexPEC] - hy[IndexPEC+1])
+                ex[IndexPEC+1:-1] += self.cb*(hy[IndexPEC:-1] - hy[IndexPEC+1:])
+
+
+            # for k in range(1, self.mesh.numberOfNodes()):
+            #     if k<self.mesh.getPECIndexPosition():
+            #         ex[k] = ex[k] + self.cb * (hy[k - 1] - hy[k])
+            #     elif k>self.mesh.getPECIndexPosition():
+            #         ex[k] = ex[k] + self.cb * (hy[k - 1] - hy[k])
+            #     elif k==self.mesh.getPECIndexPosition()-1:
+            #         ex[k] = ex[k] + self.leftover * self.cb * (hy[k - 1] - hy[k])
+            #         ex[k+2] = ex[k+2] + self.leftover/(self.leftover-1) * self.cb * (hy[k + 1] - hy[k+2])
 
             ex[self.kc] += Wave[0]
             hy[self.kc] += Wave[1]
 
-            for k in range(self.mesh.numberOfNodes()):
-                if k==np.floor(self.kp):
-                    hy[k] = hy[k] + self.leftover * self.cb * (ex[k])
-                elif k<np.floor(self.kp):
-                    hy[k] = hy[k] + self.cb * (ex[k] - ex[k + 1])
+
+            hy[:IndexPEC-1] += self.cb*(ex[:IndexPEC-1] - ex[1:IndexPEC])
+            hy[IndexPEC-1] += self.leftover * self.cb * ex[IndexPEC-1]
+            if IndexPEC + 1 < self.mesh.numberOfCells()-1:
+                hy[IndexPEC] += self.leftover/(self.leftover-1) * self.cb * ex[IndexPEC+1]
+                hy[IndexPEC:] += self.cb * (ex[IndexPEC:-1] - ex[IndexPEC+1:])
+
+            # for k in range(self.mesh.numberOfNodes()-1):
+            #     if k==self.mesh.getPECIndexPosition()-1:
+            #         hy[k] = hy[k] + self.leftover * self.cb * (ex[k])
+            #     elif k<self.mesh.getPECIndexPosition():
+            #         hy[k] = hy[k] + self.cb * (ex[k] - ex[k + 1])
 
             probeE[:,time_step]=ex[:]
             probeH[:,time_step]=hy[:]
