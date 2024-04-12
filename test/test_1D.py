@@ -4,14 +4,11 @@ from matplotlib import pyplot as plt
 
 from cfdtd.CFDTD1D import *
 
-Cells = 120
-PEC_sheet = 119.5
-cfl = 0.5
 
 def test_pec_pulse():
-    mesh = Mesh(200.0, 200.0, 1.0)
-    pulse = InitialPulse(40, 10)
-    solver = CFDTD1D(mesh, pulse, "Gaussian", 0.75)
+    mesh = Mesh(box_size=200.0, pec_sheet_position=100.5, dx=1.0)
+    pulse = InitialPulse(initial_time=40, initial_position=40, spread=10, pulse_type="Gaussian")
+    solver = CFDTD1D(mesh, pulse, boundary_type="periodic", cfl=0.5)
     probeE, probeH = solver.run(1000)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
@@ -42,25 +39,17 @@ def test_pec_pulse():
 
 
     # Create the animation
-    ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=2.5, repeat=False)
+    ani = FuncAnimation(fig, animate, frames=1001, init_func=init, blit=True, interval=3.5, repeat=False)
 
     # Show the animation
     plt.show()
 
-def test_mesh_comparative():
-    conformal_mesh = cfdtd.SpatialMesh()
-    non_conformal_mesh = fdtd.SpatialMesh()
+def test_ElectricField_on_PEC():
+    nsteps = 1000
+    
+    mesh = Mesh(box_size=200.0, pec_sheet_position=100.5, dx=1.0)
+    pulse = InitialPulse(initial_time=40, initial_position=40, spread=10, pulse_type="Gaussian")
+    solver = CFDTD1D(mesh, pulse, boundary_type="periodic", cfl=0.8)
+    probeE, probeH = solver.run(nsteps)
 
-    if Cells == PEC_sheet:
-        assert np.array_equal(conformal_mesh, non_conformal_mesh)
-    else:
-        assert (not np.array_equal(conformal_mesh, non_conformal_mesh))
-
-
-def test_field_comparative_with_equal_mesh():
-    conformal_fields = cfdtd.run()
-    non_conformal_fields = fdtd.FDTDLoop()
-
-    if (Cells == PEC_sheet) and (cfdtd.CourantConditionNumber() <= 1):
-        assert np.array_equal(conformal_fields[0], non_conformal_fields[0])
-        assert np.array_equal(conformal_fields[1], non_conformal_fields[1])
+    assert np.allclose(probeE[mesh.getPECIndexPosition(), :], np.zeros(nsteps))
