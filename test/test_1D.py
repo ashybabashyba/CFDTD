@@ -24,18 +24,18 @@ def test_visual_pec_pulse():
 
 
 def test_ElectricField_on_PEC():
-    nsteps = 1000
+    final_time = 1000
     
     mesh = Mesh(box_size=200.0, pec_sheet_position=100.5, dx=1.0)
     pulse = InitialPulse(initial_time=40, initial_position=40, spread=10, pulse_type="Gaussian")
     solver = CFDTD1D(mesh, pulse, boundary_type="periodic", cfl=0.8)
-    probeE, probeH = solver.run(nsteps)
+    probeE, probeH = solver.run(final_time)
 
-    assert np.allclose(probeE[mesh.getPECIndexPosition(), :], np.zeros(nsteps))
+    assert np.allclose(probeE[mesh.getPECIndexPosition(), :], np.zeros(int(final_time/solver.dt)))
 
 def test_ElectricField_delay():
     courantNumber = 0.5
-    nsteps = int(800 / courantNumber)
+    final_time = 800 
     pulse = InitialPulse(initial_time=40, initial_position=100, spread=10, pulse_type="Gaussian")
 
     conformalMesh = Mesh(box_size=200.0, pec_sheet_position=200, dx=1.0)
@@ -44,8 +44,8 @@ def test_ElectricField_delay():
     conformalSolver = CFDTD1D(conformalMesh, pulse, boundary_type="pec", cfl=courantNumber)
     nonConformalSolver = CFDTD1D(nonConformalMesh, pulse, boundary_type="pec", cfl=courantNumber)
 
-    conformalE, conformalH = conformalSolver.run(nsteps)
-    nonConformalE, nonConformalH = nonConformalSolver.run(nsteps)
+    conformalE, conformalH = conformalSolver.run(final_time)
+    nonConformalE, nonConformalH = nonConformalSolver.run(final_time)
 
     # plt.plot(conformalMesh.xE, conformalE[:,conformalE.shape[1]-1], '.-', label='Conformal Electric Field')
     # plt.plot(nonConformalMesh.xE, nonConformalE[:,conformalE.shape[1]-1], '.-', label='Non Conformal Electric Field')
@@ -55,10 +55,10 @@ def test_ElectricField_delay():
     # plt.grid(which='both')
     # plt.show()
 
-    for n in range(int(120/courantNumber)):
+    for n in range(120):
         assert np.allclose(conformalE[:-1, n], nonConformalE[:-2, n], atol=1.e-1)
         assert np.allclose(conformalH[:-1, n], nonConformalH[:-2, n], atol=1.e-1)
 
-    for n in range(int(150/courantNumber), int(500/courantNumber)):
+    for n in range(150,500):
         assert np.allclose(conformalE[:-1, n], nonConformalE[:-2, n-1], atol=1.e-1)
         assert np.allclose(conformalH[:-1, n], nonConformalH[:-2, n-1], atol=1.e-1)

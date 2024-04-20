@@ -86,7 +86,8 @@ class CFDTD1D():
 
         return probeE, probeH
     
-    def run(self, nsteps):
+    def run(self, final_time):
+        nsteps = int(final_time/self.dt)
         ex, hy = self.buildFields()
         probeE, probeH = self.buildFieldsInAllTimeSteps(nsteps)
         IndexPEC = self.mesh.getPECIndexPosition()
