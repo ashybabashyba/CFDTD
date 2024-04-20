@@ -32,3 +32,33 @@ def test_ElectricField_on_PEC():
     probeE, probeH = solver.run(nsteps)
 
     assert np.allclose(probeE[mesh.getPECIndexPosition(), :], np.zeros(nsteps))
+
+def test_ElectricField_delay():
+    courantNumber = 0.5
+    nsteps = int(800 / courantNumber)
+    pulse = InitialPulse(initial_time=40, initial_position=100, spread=10, pulse_type="Gaussian")
+
+    conformalMesh = Mesh(box_size=200.0, pec_sheet_position=200, dx=1.0)
+    nonConformalMesh = Mesh(box_size=200.0, pec_sheet_position=199.5, dx=1.0)
+
+    conformalSolver = CFDTD1D(conformalMesh, pulse, boundary_type="pec", cfl=courantNumber)
+    nonConformalSolver = CFDTD1D(nonConformalMesh, pulse, boundary_type="pec", cfl=courantNumber)
+
+    conformalE, conformalH = conformalSolver.run(nsteps)
+    nonConformalE, nonConformalH = nonConformalSolver.run(nsteps)
+
+    # plt.plot(conformalMesh.xE, conformalE[:,conformalE.shape[1]-1], '.-', label='Conformal Electric Field')
+    # plt.plot(nonConformalMesh.xE, nonConformalE[:,conformalE.shape[1]-1], '.-', label='Non Conformal Electric Field')
+    # plt.axvline(x=nonConformalMesh.getPECSheetPosition(), color='r', linestyle='--', label='PEC sheet position')
+    # plt.legend()
+    # plt.ylim(-2.1, 2.1)
+    # plt.grid(which='both')
+    # plt.show()
+
+    for n in range(int(120/courantNumber)):
+        assert np.allclose(conformalE[:-1, n], nonConformalE[:-2, n], atol=1.e-1)
+        assert np.allclose(conformalH[:-1, n], nonConformalH[:-2, n], atol=1.e-1)
+
+    for n in range(int(150/courantNumber), int(500/courantNumber)):
+        assert np.allclose(conformalE[:-1, n], nonConformalE[:-2, n-1], atol=1.e-1)
+        assert np.allclose(conformalH[:-1, n], nonConformalH[:-2, n-1], atol=1.e-1)
