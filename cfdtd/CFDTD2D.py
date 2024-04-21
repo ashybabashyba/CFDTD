@@ -1,5 +1,5 @@
 import numpy as np
-from math import exp
+import math
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
@@ -26,7 +26,7 @@ class CFDTD2D():
 
         self.dx = self.mesh.dx
         self.dy = self.mesh.dy
-        self.dt = cfl*np.sqrt(self.dx**2/2 + self.dy**2/2)
+        self.dt = cfl*math.sqrt(self.dx**2 + self.dy**2)/2
 
     def buildFields(self):
         Ex = np.zeros((self.mesh.gridEx.size, self.mesh.gridEy.size))
@@ -47,7 +47,7 @@ class CFDTD2D():
         initialH = self.buildFields()[2]
         for i in range(self.mesh.gridHx.size):
             for j in range(self.mesh.gridHy.size):
-                initialH[i,j] = exp(- ((self.mesh.gridHx[i]-self.center[0])**2 + (self.mesh.gridHy[j]-self.center[1])**2) /np.sqrt(2.0) / self.spread)
+                initialH[i,j] = math.exp(- ((self.mesh.gridHx[i]-self.center[0])**2 + (self.mesh.gridHy[j]-self.center[1])**2) /math.sqrt(2.0) / self.spread)
         return initialH
 
     def run(self, nsteps):
@@ -74,7 +74,8 @@ class CFDTD2D():
             # --- Updates H field ---
             for i in range(self.mesh.gridHx.size):
                 for j in range(self.mesh.gridHx.size):
-                    Hz[i][j] = Hz[i][j] - self.dt/self.dx * (Ey[i+1][j  ] - Ey[i][j]) +self.dt/self.dy * (Ex[i  ][j+1] - Ex[i][j])
+                    Hz[i][j] = Hz[i][j] - self.dt/self.dx * (Ey[i+1][j  ] - Ey[i][j]) +\
+                                          self.dt/self.dy * (Ex[i  ][j+1] - Ex[i][j])
                     
             
             
@@ -89,7 +90,7 @@ class CFDTD2D():
 
 
 mesh = Mesh(box_size=10.0, dx=0.1, dy=0.1)
-solver = CFDTD2D(mesh, (5.0, 5.0), spread=1.0, cfl=0.5)
+solver = CFDTD2D(mesh, (5.0, 5.0), spread=1.0, cfl=0.99)
 nsteps = int(50 / solver.dt)
 probeEx, probeEy, probeHz, probeTime = solver.run(nsteps)
 
