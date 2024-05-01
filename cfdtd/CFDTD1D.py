@@ -1,7 +1,6 @@
 import numpy as np
 from math import exp
 from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 class Mesh():
     def __init__(self, box_size, pec_sheet_position, dx):
