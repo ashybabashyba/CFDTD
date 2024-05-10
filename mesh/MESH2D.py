@@ -38,6 +38,11 @@ class Mesh():
 
         for i in self.gridEy:
             self.rows.append(self.gridEx.tolist())
+        return self.columns, self.rows
+
+    def getIntersectionPoints(self):
+        self.columns_intersection_points = []
+        self.rows_intersection_points = []
 
         if self.nodesList is not None:
 
@@ -47,18 +52,18 @@ class Mesh():
 
                 for j in range(len(self.gridEx)):
                     if min(current_node[0], next_node[0]) <= self.gridEx[j] <= max(current_node[0], next_node[0]):
-                        self.columns[j].append(lineEquation(current_node, next_node)(self.gridEx[j]))
-                        self.columns[j].sort()
+                        self.columns_intersection_points.append((self.gridEx[j], lineEquation(current_node, next_node)(self.gridEx[j])))
 
                 for k in range(len(self.gridEy)):
                     if min(current_node[1], next_node[1]) <= self.gridEy[k] <= max(current_node[1], next_node[1]):
-                        self.rows[k].append(inverseLineEquation(current_node, next_node)(self.gridEy[k]))
-                        self.rows[k].sort()
+                        self.rows_intersection_points.append((inverseLineEquation(current_node, next_node)(self.gridEy[k]), self.gridEy[k]))
 
-        return self.columns, self.rows
+        return self.columns_intersection_points, self.rows_intersection_points
 
     def plotElectricFieldGrid(self):
         columns, rows = self.electricFieldGridCreation()
+        columns_intersection, rows_intersection = self.getIntersectionPoints()
+
         fig, ax = plt.subplots()
         for i, vec in enumerate(columns):
             x_coords = [self.gridEx[i]] * len(vec)  # Coordenadas x iguales para cada vector
@@ -79,14 +84,25 @@ class Mesh():
                 y_vals = np.linspace(current_node[1], next_node[1], 100)
                 ax.plot(x_vals, y_vals, color='r')
 
+            for i, vec in enumerate(columns_intersection):
+                x_coords = columns_intersection[i][0]  
+                y_coords = columns_intersection[i][1]  
+                ax.plot(x_coords, y_coords, marker='^', color='black')
+
+            for j, vec in enumerate(rows_intersection):
+                x_coords = rows_intersection[j][0]
+                y_coords = rows_intersection[j][1]                      
+                ax.plot(x_coords, y_coords, marker='^', color='black')
+
+            
+
         ax.set_xlabel('Grid Ex')
         ax.set_ylabel('Grid Ey')
         ax.set_title('Mesh Plot')
-        ax.legend()
         ax.grid(True)
         plt.show()
 
 
-node_list = [(0,0), (1,10)]
-mesh = Mesh(box_size=10, dx=1.0, dy=0.5, external_nodes_list_PEC=node_list)
+node_list = [(0,0), (10,1), (5,10)]
+mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
 mesh.plotElectricFieldGrid()
