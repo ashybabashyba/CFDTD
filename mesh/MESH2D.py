@@ -72,6 +72,7 @@ class Mesh():
         cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
 
         PEC_lines = []
+        non_repeated_intersections = []
         number_of_intersections = 0
 
         if self.nodesList is not None:
@@ -84,12 +85,14 @@ class Mesh():
             
             for line in PEC_lines:
                 if cell_polygon.intersects(line):
-                    intersection = cell_polygon.intersection(line)
-                    if intersection.geom_type == 'MultiLineString':
-                        number_of_intersections += len(intersection)
-                    elif intersection.geom_type == 'LineString':
-                        number_of_intersections += len(intersection.coords) - 1       
+                    intersection = shape.intersection(cell_polygon, line)
+                    
+                    for i in range(len(intersection.coords)):
+                        if intersection.coords[i] not in non_repeated_intersections:
+                            non_repeated_intersections.append(intersection.coords[i])
+                            number_of_intersections += 1
 
+                    
         return number_of_intersections
 
     def plotElectricFieldGrid(self):
@@ -137,5 +140,5 @@ class Mesh():
 
 node_list = [(0,0), (10,1)]
 mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
-mesh.plotElectricFieldGrid()
-print(mesh.getNumberOfIntersections((1,0)))
+# mesh.plotElectricFieldGrid()
+print(mesh.getNumberOfIntersections((0,0)))
