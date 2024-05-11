@@ -102,8 +102,8 @@ class Mesh():
         conformal_cells = []
         non_conformal_cells = []
 
-        for i in range(len(self.gridEx)):
-            for j in range(len(self.gridEy)):
+        for i in range(len(self.gridEx)-1):
+            for j in range(len(self.gridEy)-1):
                 number_of_intersections = self.getNumberOfIntersections((i,j))
                 if number_of_intersections > 1:
                     conformal_cells.append((i,j))
