@@ -76,11 +76,14 @@ class Mesh():
         number_of_intersections = 0
 
         if self.nodesList is not None:
-            for i in range(len(self.nodesList)):
-                current_node = self.nodesList[i]
-                next_node = self.nodesList[(i+1) % len(self.nodesList)]
+            if len(self.nodesList) == 2:
+                PEC_lines.append(shape.LineString([self.nodesList[0], self.nodesList[1]]))
+            else:
+                for i in range(len(self.nodesList)):
+                    current_node = self.nodesList[i]
+                    next_node = self.nodesList[(i+1) % len(self.nodesList)]
 
-                PEC_lines.append(shape.LineString([current_node, next_node]))
+                    PEC_lines.append(shape.LineString([current_node, next_node]))
 
             
             for line in PEC_lines:
@@ -89,11 +92,24 @@ class Mesh():
                     
                     for i in range(len(intersection.coords)):
                         if intersection.coords[i] not in non_repeated_intersections:
-                            non_repeated_intersections.append(intersection.coords[i])
-                            number_of_intersections += 1
+                            if (intersection.coords[i][0] % self.dx == 0) or (intersection.coords[i][1] % self.dy == 0):
+                                non_repeated_intersections.append(intersection.coords[i])
+                                number_of_intersections += 1
 
-                    
         return number_of_intersections
+    
+    def getCellSepartionByType(self):
+        conformal_cells = []
+        non_conformal_cells = []
+
+        for i in range(len(self.gridEx)):
+            for j in range(len(self.gridEy)):
+                number_of_intersections = self.getNumberOfIntersections((i,j))
+                if number_of_intersections > 1:
+                    conformal_cells.append((i,j))
+                else:
+                    non_conformal_cells.append((i,j))
+        return conformal_cells, non_conformal_cells
 
     def plotElectricFieldGrid(self):
         columns, rows = self.electricFieldGridCreation()
@@ -136,9 +152,3 @@ class Mesh():
         ax.set_title('Mesh Plot')
         ax.grid(True)
         plt.show()
-
-
-node_list = [(0,0), (10,1)]
-mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
-# mesh.plotElectricFieldGrid()
-print(mesh.getNumberOfIntersections((0,0)))
