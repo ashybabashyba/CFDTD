@@ -98,9 +98,23 @@ class Mesh():
 
         return number_of_intersections
     
-    def getCellSepartionByType(self):
+    def getCellArea(self, cell):
+        left_column = cell[0]*self.dx
+        right_column = (cell[0]+1)*self.dx
+
+        bottom_row = cell[1]*self.dy
+        top_row = (cell[1]+1)*self.dy
+
+        cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
+        PEC_polygon = shape.Polygon(self.nodesList)
+
+        return shape.area(shape.difference(cell_polygon, PEC_polygon))
+
+    
+    def getCellSeparationByType(self):
         conformal_cells = []
-        non_conformal_cells = []
+        outside_non_conformal_cells = []
+        inside_non_conformal_cells = []
 
         for i in range(len(self.gridEx)-1):
             for j in range(len(self.gridEy)-1):
@@ -108,8 +122,12 @@ class Mesh():
                 if number_of_intersections > 1:
                     conformal_cells.append((i,j))
                 else:
-                    non_conformal_cells.append((i,j))
-        return conformal_cells, non_conformal_cells
+                    if np.isclose(self.getCellArea((i,j)), self.dx * self.dy):
+                        outside_non_conformal_cells.append((i,j))
+                    else:
+                        inside_non_conformal_cells.append((i,j))
+
+        return conformal_cells, outside_non_conformal_cells, inside_non_conformal_cells
 
     def plotElectricFieldGrid(self):
         columns, rows = self.electricFieldGridCreation()
