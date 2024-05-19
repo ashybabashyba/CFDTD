@@ -39,8 +39,8 @@ def test_ElectricField_delay():
     final_time = 800 
     pulse = InitialPulse(initial_time=40, initial_position=100, spread=10, pulse_type="Gaussian")
 
-    conformalMesh = Mesh(box_size=200.0, pec_sheet_position=200, dx=1.0)
-    nonConformalMesh = Mesh(box_size=200.0, pec_sheet_position=199.5, dx=1.0)
+    conformalMesh = Mesh(box_size=200.0, pec_sheet_position=199.5, dx=1.0)
+    nonConformalMesh = Mesh(box_size=200.0, pec_sheet_position=200, dx=1.0)
 
     conformalSolver = CFDTD1D(conformalMesh, pulse, boundary_type="pec", cfl=courantNumber)
     nonConformalSolver = CFDTD1D(nonConformalMesh, pulse, boundary_type="pec", cfl=courantNumber)
