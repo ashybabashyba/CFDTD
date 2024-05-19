@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import shapely as shape
+from shapely.ops import split
 
 def lineEquation(x0, x1):
     if x0[0] == x1[0]:
@@ -17,10 +18,11 @@ def inverseLineEquation(x0, x1):
         return lambda x: m_inv*(x - x0[1]) + x0[0]
 
 class Mesh():
-    def __init__(self, box_size, dx, dy, external_nodes_list_PEC=None):
+    def __init__(self, box_size, dx, dy, external_nodes_list_PEC=None, initial_wave_cell=None):
         self.dx = dx
         self.dy = dy
         self.boxSize = box_size
+        self.initialCell = initial_wave_cell
 
         self.gridEx = np.linspace(0, box_size, int(1 + box_size/dx))
         self.gridEy = np.linspace(0, box_size, int(1 + box_size/dy))
@@ -106,13 +108,43 @@ class Mesh():
         top_row = (cell[1]+1)*self.dy
 
         cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
-        PEC_polygon = shape.Polygon(self.nodesList)
 
-        return shape.area(shape.difference(cell_polygon, PEC_polygon))
+        if len(self.nodesList) != 2:
+            PEC_polygon = shape.Polygon(self.nodesList)
+
+            return shape.area(shape.difference(cell_polygon, PEC_polygon))
+        
+        elif len(self.nodesList) == 2:
+            if self.getNumberOfIntersections(cell) > 1:
+                split_cells = [subcell for subcell in split(cell_polygon, shape.LineString(self.nodesList)).geoms]
+
+                auxiliar_polygon_list = []
+                for i in range(len(self.nodesList)):
+                    auxiliar_polygon_list.append(self.nodesList[i])
+
+                auxiliar_polygon_list.append(self.initialCell)
+
+                auxiliar_polygon = shape.Polygon(auxiliar_polygon_list)
+
+                intersection_cells = [shape.intersection(subcell, auxiliar_polygon) for subcell in split_cells]
+                area_intersection = [shape.area(subcell) for subcell in intersection_cells]
+                max_area_intersection = max(area_intersection)
+
+                if max_area_intersection == area_intersection[0]:
+                    return area_intersection[0]
+                
+                else:
+                    return area_intersection[1]
+                
+            else:
+                return shape.area(cell_polygon)
+            
+
 
     
     def getCellSeparationByType(self):
         conformal_cells = []
+        non_conformal_cells = []
         outside_non_conformal_cells = []
         inside_non_conformal_cells = []
 
@@ -122,12 +154,22 @@ class Mesh():
                 if number_of_intersections > 1:
                     conformal_cells.append((i,j))
                 else:
-                    if np.isclose(self.getCellArea((i,j)), self.dx * self.dy):
-                        outside_non_conformal_cells.append((i,j))
+                    if len(self.nodesList) != 2:
+                        if np.isclose(self.getCellArea((i,j)), self.dx * self.dy):
+                            outside_non_conformal_cells.append((i,j))
+                        else:
+                            inside_non_conformal_cells.append((i,j))
+                      
                     else:
-                        inside_non_conformal_cells.append((i,j))
+                        non_conformal_cells.append((i,j))
+                    
+        if len(self.nodesList) != 2:
+            return conformal_cells, outside_non_conformal_cells, inside_non_conformal_cells
+        
+        elif len(self.nodesList) == 2:
+            return conformal_cells, non_conformal_cells
 
-        return conformal_cells, outside_non_conformal_cells, inside_non_conformal_cells
+        
 
     def plotElectricFieldGrid(self):
         columns, rows = self.electricFieldGridCreation()
