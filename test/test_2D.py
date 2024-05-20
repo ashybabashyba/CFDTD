@@ -26,7 +26,7 @@ def test_number_of_cells_polygon():
 
 def test_number_of_cells_line():
     node_list = [(0,0.5), (10,0.5)]
-    mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
+    mesh = Mesh(box_size=10.0, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
     # mesh.plotElectricFieldGrid()
     conformalCells, nonConformalCells = mesh.getCellSeparationByType()
     assert len(conformalCells) + len(nonConformalCells)  == mesh.boxSize**2/mesh.dx/mesh.dy
@@ -54,9 +54,9 @@ def test_general_area_polygon():
         assert np.isclose(mesh.getCellArea(k), 0)
 
 def test_general_area_line():
-    node_list = [(0,0), (10,1)]
+    node_list = [(0,0), (9.5,1)]
     mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell= (0, 10))
-    # mesh.plotElectricFieldGrid()
+    mesh.plotElectricFieldGrid()
     conformalCells, nonConformalCells= mesh.getCellSeparationByType()
 
     for i in conformalCells:

@@ -31,6 +31,10 @@ class Mesh():
         self.gridHy = (self.gridEy[1:] + self.gridEy[:-1]) / 2.0
 
         self.nodesList = external_nodes_list_PEC
+
+        if len(self.nodesList) == 2:
+            if np.abs(self.nodesList[0][0] - self.nodesList[1][0]) != self.boxSize and np.abs(self.nodesList[0][1] - self.nodesList[1][1]) != self.boxSize:
+                raise ValueError('Please insert a line that cuts all the box')
     
     def electricFieldGridCreation(self):
         self.columns = []
