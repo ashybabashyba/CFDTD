@@ -35,6 +35,26 @@ class Mesh():
         if len(self.nodesList) == 2:
             if np.abs(self.nodesList[0][0] - self.nodesList[1][0]) != self.boxSize and np.abs(self.nodesList[0][1] - self.nodesList[1][1]) != self.boxSize:
                 raise ValueError('Please insert a line that cuts all the box')
+            
+        elif len(self.nodesList) > 2:
+            columns_intersection_points, rows_intersection_points = self.getIntersectionPoints()
+            columns_intersection_points.sort()
+            rows_intersection_points.sort()
+
+            for i in range(len(columns_intersection_points)):
+                for j in range(i+1, len(columns_intersection_points)):
+                    if columns_intersection_points[i][0] == columns_intersection_points[j][0] and np.abs(columns_intersection_points[i][1] - columns_intersection_points[j][1]) < self.dy:
+                        raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
+
+            for i in range(len(rows_intersection_points)):
+                for j in range(i+1, len(rows_intersection_points)):
+                    if rows_intersection_points[i][1] == columns_intersection_points[j][1] and np.abs(columns_intersection_points[i][0] - columns_intersection_points[j][0]) < self.dx:
+                        raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
+
+            for i in range(len(self.gridEx)-1):
+                for j in range(len(self.gridEy)-1):
+                    if self.getNumberOfIntersections((i,j)) > 2:
+                        raise ValueError('Please insert a polygon with no more than two intersections per cell')
     
     def electricFieldGridCreation(self):
         self.columns = []
@@ -113,7 +133,7 @@ class Mesh():
 
         cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
 
-        if len(self.nodesList) != 2:
+        if len(self.nodesList) > 2:
             PEC_polygon = shape.Polygon(self.nodesList)
 
             return shape.area(shape.difference(cell_polygon, PEC_polygon))
@@ -167,7 +187,7 @@ class Mesh():
                     else:
                         non_conformal_cells.append((i,j))
                     
-        if len(self.nodesList) != 2:
+        if len(self.nodesList) > 2:
             return conformal_cells, outside_non_conformal_cells, inside_non_conformal_cells
         
         elif len(self.nodesList) == 2:
