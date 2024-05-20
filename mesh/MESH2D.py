@@ -143,6 +143,9 @@ class Mesh():
                 split_cells = [subcell for subcell in split(cell_polygon, shape.LineString(self.nodesList)).geoms]
 
                 auxiliar_polygon_list = []
+                intersection_cells = []
+                area_intersection = []
+                
                 for i in range(len(self.nodesList)):
                     auxiliar_polygon_list.append(self.nodesList[i])
 
@@ -155,10 +158,10 @@ class Mesh():
                 max_area_intersection = max(area_intersection)
 
                 if max_area_intersection == area_intersection[0]:
-                    return area_intersection[0]
+                    return shape.area(split_cells[0])
                 
                 else:
-                    return area_intersection[1]
+                    return shape.area(split_cells[1])
                 
             else:
                 return shape.area(cell_polygon)
@@ -228,6 +231,9 @@ class Mesh():
                 x_coords = rows_intersection[j][0]
                 y_coords = rows_intersection[j][1]                      
                 ax.plot(x_coords, y_coords, marker='^', color='black')
+
+        if self.initialCell is not None:
+            ax.plot(self.initialCell[0], self.initialCell[1], marker='^' , color='green')
 
             
 
