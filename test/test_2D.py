@@ -55,8 +55,8 @@ def test_general_area_polygon():
 
 def test_general_area_line():
     node_list = [(0,0), (10,1)]
-    mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell= (0, 10))
-    mesh.plotElectricFieldGrid()
+    mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell= (0, 9))
+    # mesh.plotElectricFieldGrid()
     conformalCells, nonConformalCells= mesh.getCellSeparationByType()
 
     for i in conformalCells:
@@ -65,3 +65,49 @@ def test_general_area_line():
     for j in nonConformalCells:
         assert np.isclose(mesh.getCellArea(j), mesh.dx * mesh.dy)
 
+def test_cell_lengths_polygon():
+    node_list = [(0.5,0.5), (1.5,0.5), (1.5, 9.5), (0.5, 9.5)]
+    mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
+    # mesh.plotElectricFieldGrid()
+    conformalCells, outsideNonConformalCells, insideNonConformalCells = mesh.getCellSeparationByType()
+
+    for i in outsideNonConformalCells:
+        assert mesh.getCellLengths(i)["left"] == mesh.dy
+        assert mesh.getCellLengths(i)["right"] == mesh.dy
+
+        assert mesh.getCellLengths(i)["top"] == mesh.dx
+        assert mesh.getCellLengths(i)["bottom"] == mesh.dx
+
+    for i in insideNonConformalCells:
+        assert mesh.getCellLengths(i)["left"] == mesh.dy
+        assert mesh.getCellLengths(i)["right"] == mesh.dy
+
+        assert mesh.getCellLengths(i)["top"] == mesh.dx
+        assert mesh.getCellLengths(i)["bottom"] == mesh.dx
+
+    for i in conformalCells:
+        assert mesh.getCellLengths(i)["left"] <= mesh.dy
+        assert mesh.getCellLengths(i)["right"] <= mesh.dy
+
+        assert mesh.getCellLengths(i)["top"] <= mesh.dx
+        assert mesh.getCellLengths(i)["bottom"] <= mesh.dx
+
+def test_cell_lengths_line():
+    node_list = [(0,0), (10,1)]
+    mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell= (0, 9))
+    # mesh.plotElectricFieldGrid()
+    conformalCells, nonConformalCells= mesh.getCellSeparationByType()
+
+    for i in nonConformalCells:
+        assert mesh.getCellLengths(i)["left"] == mesh.dy
+        assert mesh.getCellLengths(i)["right"] == mesh.dy
+
+        assert mesh.getCellLengths(i)["top"] == mesh.dx
+        assert mesh.getCellLengths(i)["bottom"] == mesh.dx
+
+    for i in conformalCells:
+        assert mesh.getCellLengths(i)["left"] <= mesh.dy
+        assert mesh.getCellLengths(i)["right"] <= mesh.dy
+
+        assert mesh.getCellLengths(i)["top"] <= mesh.dx
+        assert mesh.getCellLengths(i)["bottom"] <= mesh.dx

@@ -22,7 +22,15 @@ class Mesh():
         self.dx = dx
         self.dy = dy
         self.boxSize = box_size
+
         self.initialCell = initial_wave_cell
+
+        if self.initialCell is not None:
+            initial_cell_list = list(self.initialCell)
+            initial_cell_list[0] = initial_cell_list[0] + self.dx/2
+            initial_cell_list[1] = initial_cell_list[1] + self.dy/2
+
+            self.initialCell = tuple(initial_cell_list)
 
         self.gridEx = np.linspace(0, box_size, int(1 + box_size/dx))
         self.gridEy = np.linspace(0, box_size, int(1 + box_size/dy))
@@ -41,15 +49,15 @@ class Mesh():
             columns_intersection_points.sort()
             rows_intersection_points.sort()
 
-            for i in range(len(columns_intersection_points)):
-                for j in range(i+1, len(columns_intersection_points)):
-                    if columns_intersection_points[i][0] == columns_intersection_points[j][0] and np.abs(columns_intersection_points[i][1] - columns_intersection_points[j][1]) < self.dy:
-                        raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
+            # for i in range(len(columns_intersection_points)):
+            #     for j in range(i+1, len(columns_intersection_points)):
+            #         if columns_intersection_points[i][0] == columns_intersection_points[j][0] and np.abs(columns_intersection_points[i][1] - columns_intersection_points[j][1]) < self.dy:
+            #             raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
 
-            for i in range(len(rows_intersection_points)):
-                for j in range(i+1, len(rows_intersection_points)):
-                    if rows_intersection_points[i][1] == columns_intersection_points[j][1] and np.abs(columns_intersection_points[i][0] - columns_intersection_points[j][0]) < self.dx:
-                        raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
+            # for i in range(len(rows_intersection_points)):
+            #     for j in range(i+1, len(rows_intersection_points)):
+            #         if rows_intersection_points[i][1] == columns_intersection_points[j][1] and np.abs(columns_intersection_points[i][0] - columns_intersection_points[j][0]) < self.dx:
+            #             raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
 
             for i in range(len(self.gridEx)-1):
                 for j in range(len(self.gridEy)-1):
@@ -139,13 +147,16 @@ class Mesh():
             return shape.area(shape.difference(cell_polygon, PEC_polygon))
         
         elif len(self.nodesList) == 2:
+            if self.initialCell is None:
+                raise ValueError('To calculate area of the conformal cell is necessary the start cell of the initial wave')
+
             if self.getNumberOfIntersections(cell) > 1:
                 split_cells = [subcell for subcell in split(cell_polygon, shape.LineString(self.nodesList)).geoms]
 
                 auxiliar_polygon_list = []
                 intersection_cells = []
                 area_intersection = []
-                
+
                 for i in range(len(self.nodesList)):
                     auxiliar_polygon_list.append(self.nodesList[i])
 
@@ -166,8 +177,59 @@ class Mesh():
             else:
                 return shape.area(cell_polygon)
             
+    def getCellLengths(self, cell):
+        left_column = cell[0]*self.dx
+        right_column = (cell[0]+1)*self.dx
 
+        bottom_row = cell[1]*self.dy
+        top_row = (cell[1]+1)*self.dy
 
+        cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
+
+        edge_lengths = {"left": self.dy, "right": self.dy, "top": self.dx, "bottom": self.dx}
+
+        left_edge = shape.LineString([(left_column, bottom_row), (left_column, top_row)])
+        right_edge = shape.LineString([(right_column, bottom_row), (right_column, top_row)])
+        top_edge = shape.LineString([(right_column, top_row), (left_column, top_row)])
+        bottom_edge = shape.LineString([(left_column, bottom_row), (right_column, bottom_row)])
+
+        if len(self.nodesList) > 2:
+            PEC_polygon = shape.Polygon(self.nodesList)
+            difference_cell = shape.difference(cell_polygon, PEC_polygon)
+
+            if shape.intersects(difference_cell, left_edge):
+                edge_lengths["left"] = shape.intersection(difference_cell, left_edge).length
+            if shape.intersects(difference_cell, right_edge):
+                edge_lengths["right"] = shape.intersection(difference_cell, right_edge).length
+            if shape.intersects(difference_cell, top_edge):
+                edge_lengths["top"] = shape.intersection(difference_cell, top_edge).length
+            if shape.intersects(difference_cell, bottom_edge):
+                edge_lengths["bottom"] = shape.intersection(difference_cell, bottom_edge).length
+
+        elif len(self.nodesList) == 2:
+            PEC_line = shape.LineString(self.nodesList)
+            subcells = split(cell_polygon, PEC_line)
+
+            if len(subcells.geoms) == 1:
+                split_cell = subcells
+
+            elif len(subcells.geoms) == 2:
+                if shape.area(subcells.geoms[0]) == self.getCellArea(cell):
+                    split_cell = subcells.geoms[0]
+
+                elif shape.area(subcells.geoms[1]) == self.getCellArea(cell):
+                    split_cell = subcells.geoms[1]
+
+            if shape.intersects(split_cell, left_edge):
+                edge_lengths["left"] = shape.intersection(split_cell, left_edge).length
+            if shape.intersects(split_cell, right_edge):
+                edge_lengths["right"] = shape.intersection(split_cell, right_edge).length
+            if shape.intersects(split_cell, top_edge):
+                edge_lengths["top"] = shape.intersection(split_cell, top_edge).length
+            if shape.intersects(split_cell, bottom_edge):
+                edge_lengths["bottom"] = shape.intersection(split_cell, bottom_edge).length
+
+        return edge_lengths
     
     def getCellSeparationByType(self):
         conformal_cells = []
@@ -233,7 +295,7 @@ class Mesh():
                 ax.plot(x_coords, y_coords, marker='^', color='black')
 
         if self.initialCell is not None:
-            ax.plot(self.initialCell[0], self.initialCell[1], marker='^' , color='green')
+            ax.plot(self.initialCell[0], self.initialCell[1], marker='x' , color='green')
 
             
 
