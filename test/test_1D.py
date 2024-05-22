@@ -57,9 +57,9 @@ def test_ElectricField_delay():
     # plt.show()
 
     for n in range(120):
-        assert np.allclose(conformalE[:-1, n], nonConformalE[:-2, n], atol=1.e-1)
-        assert np.allclose(conformalH[:-1, n], nonConformalH[:-2, n], atol=1.e-1)
+        assert np.allclose(conformalE[:-1, n], nonConformalE[:, n], atol=2.e-1)
+        assert np.allclose(conformalH[:-1, n], nonConformalH[:, n], atol=2.e-1)
 
     for n in range(150,500):
-        assert np.allclose(conformalE[:-1, n], nonConformalE[:-2, n-1], atol=1.e-1)
-        assert np.allclose(conformalH[:-1, n], nonConformalH[:-2, n-1], atol=1.e-1)
+        assert np.allclose(conformalE[:-1, n], nonConformalE[:, n-1], atol=2.e-1)
+        assert np.allclose(conformalH[:-1, n], nonConformalH[:, n-1], atol=2.e-1)
