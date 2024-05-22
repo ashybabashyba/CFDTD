@@ -47,6 +47,12 @@ class Mesh():
             if np.abs(self.nodesList[0][0] - self.nodesList[1][0]) != self.boxSize:
                 if np.abs(self.nodesList[0][1] - self.nodesList[1][1]) != self.boxSize:
                     raise ValueError('Please insert a line that cuts all the box')
+                
+            if self.nodesList[0][0] == self.nodesList[1][0] and self.nodesList[0][0] in self.gridEx:
+                raise ValueError('Please insert the vertical line in a value not included in the x-grid')
+            
+            if self.nodesList[0][1] == self.nodesList[1][1] and self.nodesList[1][1] in self.gridEy:
+                raise ValueError('Please insert the horizontal line in a value not included in the y-grid')
             
         elif len(self.nodesList) > 2:
             columns_intersection_points, rows_intersection_points = self.getIntersectionPoints()
