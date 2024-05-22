@@ -40,30 +40,36 @@ class Mesh():
 
         self.nodesList = external_nodes_list_PEC
 
+        self.simplificationsErrors()    
+    
+    def simplificationsErrors(self):
         if len(self.nodesList) == 2:
-            if np.abs(self.nodesList[0][0] - self.nodesList[1][0]) != self.boxSize and np.abs(self.nodesList[0][1] - self.nodesList[1][1]) != self.boxSize:
-                raise ValueError('Please insert a line that cuts all the box')
+            if np.abs(self.nodesList[0][0] - self.nodesList[1][0]) != self.boxSize:
+                if np.abs(self.nodesList[0][1] - self.nodesList[1][1]) != self.boxSize:
+                    raise ValueError('Please insert a line that cuts all the box')
             
         elif len(self.nodesList) > 2:
             columns_intersection_points, rows_intersection_points = self.getIntersectionPoints()
             columns_intersection_points.sort()
             rows_intersection_points.sort()
 
-            # for i in range(len(columns_intersection_points)):
-            #     for j in range(i+1, len(columns_intersection_points)):
-            #         if columns_intersection_points[i][0] == columns_intersection_points[j][0] and np.abs(columns_intersection_points[i][1] - columns_intersection_points[j][1]) < self.dy:
-            #             raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
+            for i in range(len(columns_intersection_points)):
+                for j in range(i+1, len(columns_intersection_points)):
+                    if columns_intersection_points[i][0] == columns_intersection_points[j][0]: 
+                        if np.searchsorted(self.gridEy, columns_intersection_points[i][1]) == np.searchsorted(self.gridEy, columns_intersection_points[j][1]):
+                            raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
 
-            # for i in range(len(rows_intersection_points)):
-            #     for j in range(i+1, len(rows_intersection_points)):
-            #         if rows_intersection_points[i][1] == columns_intersection_points[j][1] and np.abs(columns_intersection_points[i][0] - columns_intersection_points[j][0]) < self.dx:
-            #             raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
+            for i in range(len(rows_intersection_points)):
+                for j in range(i+1, len(rows_intersection_points)):
+                    if rows_intersection_points[i][1] == rows_intersection_points[j][1]: 
+                        if np.searchsorted(self.gridEx, rows_intersection_points[i][0]) == np.searchsorted(self.gridEx, rows_intersection_points[j][0]):
+                            raise ValueError('Please insert a polygon who dont cut the same line of the subcell two times or more')
 
             for i in range(len(self.gridEx)-1):
                 for j in range(len(self.gridEy)-1):
                     if self.getNumberOfIntersections((i,j)) > 2:
                         raise ValueError('Please insert a polygon with no more than two intersections per cell')
-    
+
     def electricFieldGridCreation(self):
         self.columns = []
         self.rows = []
@@ -186,14 +192,13 @@ class Mesh():
 
         cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
 
-        edge_lengths = {"left": self.dy, "right": self.dy, "top": self.dx, "bottom": self.dx}
-
         left_edge = shape.LineString([(left_column, bottom_row), (left_column, top_row)])
         right_edge = shape.LineString([(right_column, bottom_row), (right_column, top_row)])
         top_edge = shape.LineString([(right_column, top_row), (left_column, top_row)])
         bottom_edge = shape.LineString([(left_column, bottom_row), (right_column, bottom_row)])
 
         if len(self.nodesList) > 2:
+            edge_lengths = {"left": self.dy, "right": self.dy, "top": self.dx, "bottom": self.dx}
             PEC_polygon = shape.Polygon(self.nodesList)
             difference_cell = shape.difference(cell_polygon, PEC_polygon)
 
@@ -207,6 +212,7 @@ class Mesh():
                 edge_lengths["bottom"] = shape.intersection(difference_cell, bottom_edge).length
 
         elif len(self.nodesList) == 2:
+            edge_lengths = {"left": 0, "right": 0, "top": 0, "bottom": 0}
             PEC_line = shape.LineString(self.nodesList)
             subcells = split(cell_polygon, PEC_line)
 

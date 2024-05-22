@@ -5,7 +5,7 @@ import shapely as shape
 from mesh.MESH2D import *
 
 def test_visualization_of_the_mesh():
-    node_list = [(0.5,0.5), (9.5,0.5), (9.5, 9.5), (0.5, 9.5)]
+    node_list = [(0.5,0.5), (0.5,1.5), (9.5, 1.5), (9.5, 0.5)]
     mesh = Mesh(box_size=10, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list)
     mesh.plotElectricFieldGrid()
 
