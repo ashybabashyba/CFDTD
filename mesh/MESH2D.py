@@ -130,7 +130,6 @@ class Mesh():
                     next_node = self.nodesList[(i+1) % len(self.nodesList)]
 
                     PEC_lines.append(shape.LineString([current_node, next_node]))
-
             
             for line in PEC_lines:
                 if cell_polygon.intersects(line):
