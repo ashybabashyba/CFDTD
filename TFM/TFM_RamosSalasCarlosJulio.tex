@@ -1,0 +1,301 @@
+%!TEX TS-program = pdflatex
+%!TEX encoding = utf8
+\documentclass[12pt, twoside]{book}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, spanish, es-noshorthands]{babel}
+%% FONTS: libertine+biolinum+stix
+\usepackage[mono=false]{libertine}
+\usepackage[notext]{stix}
+
+% =====================
+% = Datos importantes =
+% =====================
+% hay que rellenar estos datos y luego
+% ir a \begin{document}
+
+\title{TITULO TFM}
+\author{Carlos Julio Ramos Salas}
+\date{30 Junio 2024}
+\newcommand{\tutores}[1]{\newcommand{\guardatutores}{#1}}
+\tutores{Dr. Luis Manuel Díaz Angulo}
+
+% ======================
+% = Páginas de títulos =
+% ======================
+\makeatletter
+\edef\maintitle{\@title}
+\renewcommand\maketitle{%
+  \begin{titlepage}
+      \vspace*{1.5cm}
+      \parskip=0pt
+      \Huge\bfseries
+      \begin{center}
+          \leavevmode\includegraphics[totalheight=6cm]{Imagenes/sello.jpg}\\[2cm]
+          \@title
+      \end{center}
+      \vspace{1cm}
+      \begin{center}
+          \@author
+      \end{center}
+  \end{titlepage}
+  
+  \begin{titlepage}
+  \parindent=0pt
+  \begin{flushleft}
+  \vspace*{1.5mm}
+  \setlength\baselineskip{0pt}
+  \setlength\parskip{0mm}
+  \begin{center}
+      \leavevmode\includegraphics[totalheight=4.5cm]{Imagenes/sello.jpg}
+  \end{center}
+  \end{flushleft}
+  \vspace{1cm}
+  \bgroup
+  \Large \bfseries
+  \begin{center}
+  \@title
+  \end{center}
+  \egroup
+  \vspace*{.5cm}
+  \begin{center}
+  \@author
+  \end{center}
+  \vspace*{1.8cm}
+  \begin{flushright}
+  \begin{minipage}{8.45cm}
+      Memoria del {\bf Trabajo Fin de Máster}.\\ 
+      Máster en Física y Matemáticas (FisyMat) \\ 
+      Universidad de Granada.
+
+      \vspace*{7.5mm}
+
+      Tutorizado por:
+      % \vspace*{5mm}
+  \end{minipage}\par
+  \begin{tabularx}{8.45cm}[b]{@{}l}
+      \guardatutores
+  \end{tabularx}
+   \end{flushright}
+      \vspace*{\fill}
+   \end{titlepage}
+   %%% Esto es necesario...
+   \pagestyle{tfg}
+   \renewcommand{\chaptermark}[1]{\markright{\thechapter.\space ##1}}
+   \renewcommand{\sectionmark}[1]{}
+   \renewcommand{\subsectionmark}[1]{}
+  }
+\makeatother
+
+% ======================================
+% = Color de la Universidad de Sevilla =
+% ======================================
+\usepackage{tikz}
+\definecolor{USred}{cmyk}{0,1.00,0.65,0.34}
+
+% =========
+% = Otros =
+% =========
+\usepackage[]{tabularx}
+\usepackage[]{enumitem}
+\setlist{noitemsep}
+
+% ==========================
+% = Matemáticas y teoremas =
+% ==========================
+\usepackage[]{amsmath}
+\usepackage[]{amsthm}
+\usepackage[]{mathtools}
+\usepackage[]{bm}
+\usepackage[]{thmtools}
+\newcommand{\marcador}{\vrule height 10pt depth 2pt width 2pt \hskip .5em\relax}
+\newcommand{\cabeceraespecial}{%
+    \color{USred}%
+    \normalfont\bfseries}
+\declaretheoremstyle[
+    spaceabove=\medskipamount,
+    spacebelow=\medskipamount,
+    headfont=\cabeceraespecial\marcador,
+    notefont=\cabeceraespecial,
+    notebraces={(}{)},
+    bodyfont=\normalfont\itshape,
+    postheadspace=1em,
+    numberwithin=chapter,
+    headindent=0pt,
+    headpunct={.}
+    ]{importante}
+\declaretheoremstyle[
+    spaceabove=\medskipamount,
+    spacebelow=\medskipamount,
+    headfont=\normalfont\itshape\color{USred},
+    notefont=\normalfont,
+    notebraces={(}{)},
+    bodyfont=\normalfont,
+    postheadspace=1em,
+    numberwithin=chapter,
+    headindent=0pt,
+    headpunct={.}
+    ]{normal}
+\declaretheoremstyle[
+    spaceabove=\medskipamount,
+    spacebelow=\medskipamount,
+    headfont=\normalfont\itshape\color{USred},
+    notefont=\normalfont,
+    notebraces={(}{)},
+    bodyfont=\normalfont,
+    postheadspace=1em,
+    headindent=0pt,
+    headpunct={.},
+    numbered=no,
+    qed=\color{USred}\marcador
+    ]{demostracion}
+
+% Los nombres de los enunciados. Añade los que necesites.
+\declaretheorem[name=Observaci\'on, style=normal]{remark}
+\declaretheorem[name=Corolario, style=normal]{corollary}
+\declaretheorem[name=Proposici\'on, style=normal]{proposition}
+\declaretheorem[name=Lema, style=normal]{lemma}
+
+\declaretheorem[name=Teorema, style=importante]{theorem}
+\declaretheorem[name=Definici\'on, style=importante]{definition}
+
+\let\proof=\undefined
+\declaretheorem[name=Demostraci\'on, style=demostracion]{proof}
+
+
+% ============================
+% = Composición de la página =
+% ============================
+\usepackage[
+    a4paper,
+    textwidth=80ex,
+]{geometry}
+
+\linespread{1.069}
+\parskip=10pt plus 1pt minus .5pt
+\frenchspacing
+% \raggedright
+
+
+% ==============================
+% = Composición de los títulos =
+% ==============================
+
+\usepackage[explicit]{titlesec}
+
+\newcommand{\hsp}{\hspace{20pt}}
+\titleformat{\chapter}[hang]
+    {\Huge\sffamily\bfseries}
+    {\thechapter\hsp\textcolor{USred}{\vrule width 2pt}\hsp}{0pt}
+    {#1}
+\titleformat{\section}
+  {\normalfont\Large\sffamily\bfseries}{\thesection\space\space}
+  {1ex}
+  {#1}
+\titleformat{\subsection}
+  {\normalfont\large\sffamily}{\thesubsection\space\space}
+  {1ex}
+  {#1}
+
+% =======================
+% = Cabeceras de página =
+% =======================
+\usepackage[]{fancyhdr}
+\usepackage[]{emptypage}
+\fancypagestyle{plain}{%
+    \fancyhf{}%
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+\fancypagestyle{tfg}{%
+    \fancyhf{}%
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+    \fancyhead[LE]{{\normalsize\color{USred}\bfseries\thepage}\quad
+                    \small\textsc{\MakeLowercase{\maintitle}}}
+    \fancyhead[RO]{\small\textsc{\MakeLowercase{\rightmark}}%
+                    \quad{\normalsize\bfseries\color{USred}\thepage}}%
+                    }
+
+% =============================
+% = El documento empieza aquí =
+% =============================
+\begin{document}
+
+
+\maketitle
+
+\frontmatter
+\tableofcontents
+
+\mainmatter
+
+
+\chapter*{English Abstract}
+\addcontentsline{toc}{chapter}{English Abstract}
+\markright{English Abstract}
+
+
+
+\begin{otherlanguage}{english}
+    According to the guidelines, every dissertation should include a short english abstract at the beginning. In the abstract, you describe in general terms what is your dissertation about, the main points you want to make, and any important consequences that may arise.
+\end{otherlanguage}
+
+
+\chapter{Los enunciados}
+
+\section{Teoremas y demostraciones}
+
+
+\begin{theorem}[Euclides]\label{thm:th1}
+    Esto es un Teorema. Se numeran a partir del 1 en cada capítulo. Como son importantes, tienen un cuadrado rojo al principio. Llevan letra cursiva.
+\end{theorem}
+
+\begin{proof}
+    Esto es la demostración. Al final de la demostración se puede ver un cuadrado rojo similar al de los teoremas. Las demostraciones no llevan letra cursiva.
+\end{proof}
+
+
+\begin{definition}\label{def:1}
+    Esto es una definición. Las definiciones son importantes; también llevan un cuadradito rojo.
+\end{definition}
+
+
+\subsection{Otros enunciados}
+
+
+\begin{remark}
+    Esto es una observación, que dice que $e=mc^{2}$. Como las observaciones no son importantes, no llevan cuadrado rojo, y el tipo de letra no es cursiva.
+\end{remark}
+
+
+\begin{proof}
+    Si la demostración acaba en una fórmula, para poner el cuadrado rojo a la altura de la última formula, hay que usar la orden \verb|\qedhere|, como en este caso:
+    \[
+        e=mc^{2}.\qedhere
+    \]
+
+\end{proof}
+
+
+\begin{corollary}\label{cor:1}
+    Esto es un corolario.
+\end{corollary}
+
+\begin{proposition}\label{pro:1}
+    Esto es una proposición.
+\end{proposition}
+
+\begin{lemma}[Gauss]\label{lem:1}
+    Esto es un lema.
+\end{lemma}
+
+
+\backmatter
+
+\bibliographystyle{acm}
+% \biliography{miarchivo} % -> lee miarchivo.bib
+
+
+
+\end{document}
