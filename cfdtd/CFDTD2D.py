@@ -3,22 +3,10 @@ import math
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
-
-class Mesh():
-    def __init__(self, box_size, dx, dy):
-        self.dx = dx
-        self.dy = dy
-        self.boxSize = box_size
-
-        self.gridEx = np.linspace(0, box_size, int(1 + box_size/dx))
-        self.gridEy = np.linspace(0, box_size, int(1 + box_size/dy))
-
-        self.gridHx = (self.gridEx[1:] + self.gridEx[:-1]) / 2.0
-        self.gridHy = (self.gridEy[1:] + self.gridEy[:-1]) / 2.0
+from mesh.MESH2D import Mesh
 
 class CFDTD2D():
     def __init__(self, mesh, initial_position, spread, cfl):
-
         self.mesh = mesh
         self.center = initial_position
         self.cfl = cfl
@@ -71,11 +59,12 @@ class CFDTD2D():
             Ey[ 0][ :] = 0.0
             Ey[-1][ :] = 0.0  
 
-            # --- Updates H field ---
+            # --- Updates H field. Dey-Mittra ---
             for i in range(self.mesh.gridHx.size):
                 for j in range(self.mesh.gridHx.size):
-                    Hz[i][j] = Hz[i][j] - self.dt/self.dx * (Ey[i+1][j  ] - Ey[i][j]) +\
-                                          self.dt/self.dy * (Ex[i  ][j+1] - Ex[i][j])
+                    if self.mesh.getCellArea((i,j)) != 0:
+                        Hz[i][j] = Hz[i][j] - self.dt/self.mesh.getCellArea((i,j)) * (self.mesh.getCellLengths((i,j))["right"]*Ey[i+1][j  ] - self.mesh.getCellLengths((i,j))["left"]*Ey[i][j] +\
+                                                                                    self.mesh.getCellLengths((i,j))["bottom"]*Ex[i  ][j] - self.mesh.getCellLengths((i,j))["top"]*Ex[i][j+1])
                     
             
             
@@ -87,33 +76,3 @@ class CFDTD2D():
             t += self.dt
 
         return probeEx, probeEy, probeHz, probeTime
-
-
-mesh = Mesh(box_size=10.0, dx=0.1, dy=0.1)
-solver = CFDTD2D(mesh, (5.0, 5.0), spread=1.0, cfl=0.99)
-nsteps = int(50 / solver.dt)
-probeEx, probeEy, probeHz, probeTime = solver.run(nsteps)
-
-# --- Creates animation ---
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-#ax = plt.axes(xlim=(gridE[0], gridE[-1]), ylim=(-1.1, 1.1))
-ax.set_xlabel('X coordinate [m]')
-ax.set_ylabel('Y coordinate [m]')
-line = plt.imshow(probeHz[:,:,0], animated=True, vmin=-0.5, vmax=0.5)
-timeText = ax.text(0.02, 0.95, '', transform=ax.transAxes)
-
-def init():
-    line.set_array(probeHz[:,:,0])
-    timeText.set_text('')
-    return line, timeText
-
-def animate(i):
-    line.set_array(probeHz[:,:,i])
-    timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
-    return line, timeText
-
-anim = animation.FuncAnimation(fig, animate, init_func=init,
-                               frames=nsteps, interval=50, blit=True)
-
-plt.show()
