@@ -1,9 +1,9 @@
 %!TEX TS-program = pdflatex
 %!TEX encoding = utf8
-\documentclass[12pt, twoside]{book}
+\documentclass[12pt, oneside]{book}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[english, spanish, es-noshorthands]{babel}
+\usepackage[english]{babel}
 %% FONTS: libertine+biolinum+stix
 \usepackage[mono=false]{libertine}
 \usepackage[notext]{stix}
@@ -14,7 +14,7 @@
 % hay que rellenar estos datos y luego
 % ir a \begin{document}
 
-\title{TITULO TFM}
+\title{Simulation and implementation of a Conformal Finite Difference Time Domain method}
 \author{Carlos Julio Ramos Salas}
 \date{30 Junio 2024}
 \newcommand{\tutores}[1]{\newcommand{\guardatutores}{#1}}
@@ -66,11 +66,11 @@
   \begin{minipage}{8.45cm}
       Memoria del {\bf Trabajo Fin de Máster}.\\ 
       Máster en Física y Matemáticas (FisyMat) \\ 
-      Universidad de Granada.
+      University of Granada (UGR).
 
       \vspace*{7.5mm}
 
-      Tutorizado por:
+      Tutored by:
       % \vspace*{5mm}
   \end{minipage}\par
   \begin{tabularx}{8.45cm}[b]{@{}l}
@@ -237,10 +237,21 @@
 
 
 
-\begin{otherlanguage}{english}
-    According to the guidelines, every dissertation should include a short english abstract at the beginning. In the abstract, you describe in general terms what is your dissertation about, the main points you want to make, and any important consequences that may arise.
-\end{otherlanguage}
+%\begin{otherlanguage}{english}
+%    Hello, my name is carlos and idk wtf writhe down here :D
+%\end{otherlanguage}
 
+\chapter*{Resumen en Español}
+\addcontentsline{toc}{chapter}{Resumen en Español}
+\markright{Resumen en Español}
+
+\begin{otherlanguage*}{spanish}
+    \indent Algunas ecuaciones diferenciales en la literatura presentan un trabajo arduoso para encontrar la solución asociada, incluso en algunos casos, la solución a dicho sistema resulta ser imposible de encontrar a través de métodos analíticos. Ante esta situación los métodos numéricos juegan un papel importante ya que nos permiten resolver el sistema de interés a través de operaciones discretas con un bajo error numérico de por medio. 
+
+    \indent Entre las diversas técnicas existentes para poder resolver problemas de electromagnetismo destaca el método de diferencias finitas en el dominio del tiempo (FDTD por sus siglas en inglés), sin embargo, al momento de considerar geometrías complicadas, es necesario refinar el método en búsqueda de una mayor eficiencia, allí es donde se puede introducir la técnica conforme de diferencias finitas (CFDTD), la cual puede ser estudiada como la modificación de FDTD al introducir un volumen de conductor eléctrico perfecto (PEC) en la geometría a considerar.
+
+    \indent En el presente trabajo se realiza una simulación e implementación del método CFDTD tanto en una como en dos dimensiones, en este último caso, considerando una línea o un área de PEC que interrumpen en el mallado. Los códigos trabajados fueron realizados con desarrollo orientado por tests en el lenguaje python, estos pueden encontrar en el repositorio de GitHub asociado presentado en anexos.
+\end{otherlanguage*}
 
 \chapter{Los enunciados}
 
