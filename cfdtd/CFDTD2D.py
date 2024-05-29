@@ -45,21 +45,16 @@ class CFDTD2D():
         t=0.0
 
         for n in range(nsteps):
-            # --- Updates E field ---
             for i in range(1, self.mesh.gridEx.size-1):
                 for j in range(1, self.mesh.gridEy.size-1):
                     Ex[i][j] = Ex[i][j] + self.dt/self.dy * (Hz[i][j] - Hz[i  ][j-1])
                     Ey[i][j] = Ey[i][j] - self.dt/self.dx * (Hz[i][j] - Hz[i-1][j  ])
-            
-            # E field boundary conditions
-            
-            # PEC
+
             Ex[ :][ 0] = 0.0
             Ex[ :][-1] = 0.0
             Ey[ 0][ :] = 0.0
             Ey[-1][ :] = 0.0  
 
-            # --- Updates H field. Dey-Mittra ---
             for i in range(self.mesh.gridHx.size):
                 for j in range(self.mesh.gridHx.size):
                     if self.mesh.getCellArea((i,j)) != 0:
@@ -67,8 +62,6 @@ class CFDTD2D():
                                                                                     self.mesh.getCellLengths((i,j))["bottom"]*Ex[i  ][j] - self.mesh.getCellLengths((i,j))["top"]*Ex[i][j+1])
                     
             
-            
-            # --- Updates output requests ---
             probeEx[:,:,n] = Ex[:,:]
             probeEy[:,:,n] = Ey[:,:]
             probeHz[:,:,n] = Hz[:,:]
