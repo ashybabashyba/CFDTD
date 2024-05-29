@@ -6,7 +6,14 @@
 \usepackage[english]{babel}
 %% FONTS: libertine+biolinum+stix
 \usepackage[mono=false]{libertine}
-\usepackage[notext]{stix}
+\usepackage[
+backend=bibtex,
+style=phys,
+citestyle=numeric,
+sorting=none
+]{biblatex}
+
+\addbibresource{references.bib}
 
 % =====================
 % = Datos importantes =
@@ -261,60 +268,75 @@ Some differential equations in the literature present arduous work to find the a
     \indent En el presente trabajo se realiza una simulación e implementación del método CFDTD tanto en una como en dos dimensiones, en este último caso, considerando una línea o un área de PEC que interrumpen en el mallado. Los códigos trabajados fueron realizados con desarrollo orientado por tests en el lenguaje python, estos pueden encontrar en el repositorio de GitHub asociado presentado en anexos.
 \end{otherlanguage*}
 
-\chapter{Los enunciados}
+\chapter{Introduction}
 
-\section{Teoremas y demostraciones}
+IDK what to write down here
 
+\chapter{Maxwell's equations and the FDTD method}
 
-\begin{theorem}[Euclides]\label{thm:th1}
-    Esto es un Teorema. Se numeran a partir del 1 en cada capítulo. Como son importantes, tienen un cuadrado rojo al principio. Llevan letra cursiva.
-\end{theorem}
+Let's first start by introducing the Maxwell's equation of electromagnetism and the basic notions of the FDTD algorithm in one and two dimensions in the free space case.
 
-\begin{proof}
-    Esto es la demostración. Al final de la demostración se puede ver un cuadrado rojo similar al de los teoremas. Las demostraciones no llevan letra cursiva.
-\end{proof}
+\section{Introduction to the finite differences}
 
-
-\begin{definition}\label{def:1}
-    Esto es una definición. Las definiciones son importantes; también llevan un cuadradito rojo.
-\end{definition}
+Si 
 
 
-\subsection{Otros enunciados}
+% \chapter{Los enunciados}
+
+% \section{Teoremas y demostraciones}
 
 
-\begin{remark}
-    Esto es una observación, que dice que $e=mc^{2}$. Como las observaciones no son importantes, no llevan cuadrado rojo, y el tipo de letra no es cursiva.
-\end{remark}
+% \begin{theorem}[Euclides]\label{thm:th1}
+%     Esto es un Teorema. Se numeran a partir del 1 en cada capítulo. Como son importantes, tienen un cuadrado rojo al principio. Llevan letra cursiva.
+% \end{theorem}
+
+% \begin{proof}
+%     Esto es la demostración. Al final de la demostración se puede ver un cuadrado rojo similar al de los teoremas. Las demostraciones no llevan letra cursiva.
+% \end{proof}
 
 
-\begin{proof}
-    Si la demostración acaba en una fórmula, para poner el cuadrado rojo a la altura de la última formula, hay que usar la orden \verb|\qedhere|, como en este caso:
-    \[
-        e=mc^{2}.\qedhere
-    \]
-
-\end{proof}
+% \begin{definition}\label{def:1}
+%     Esto es una definición. Las definiciones son importantes; también llevan un cuadradito rojo.
+% \end{definition}
 
 
-\begin{corollary}\label{cor:1}
-    Esto es un corolario.
-\end{corollary}
-
-\begin{proposition}\label{pro:1}
-    Esto es una proposición.
-\end{proposition}
-
-\begin{lemma}[Gauss]\label{lem:1}
-    Esto es un lema.
-\end{lemma}
+% \subsection{Otros enunciados}
 
 
-\backmatter
+% \begin{remark}
+%     Esto es una observación, que dice que $e=mc^{2}$. Como las observaciones no son importantes, no llevan cuadrado rojo, y el tipo de letra no es cursiva.
+% \end{remark}
 
-\bibliographystyle{acm}
-% \biliography{miarchivo} % -> lee miarchivo.bib
+
+% \begin{proof}
+%     Si la demostración acaba en una fórmula, para poner el cuadrado rojo a la altura de la última formula, hay que usar la orden \verb|\qedhere|, como en este caso:
+%     \[
+%         e=mc^{2}.\qedhere
+%     \]
+
+% \end{proof}
 
 
+% \begin{corollary}\label{cor:1}
+%     Esto es un corolario.
+% \end{corollary}
+
+% \begin{proposition}\label{pro:1}
+%     Esto es una proposición.
+% \end{proposition}
+
+% \begin{lemma}[Gauss]\label{lem:1}
+%     Esto es un lema.
+% \end{lemma}
+
+
+
+% \bibliographystyle{plain}
+% \biliography{references} 
+
+\chapter{References}
+\nocite{*}
+%------------------------------------------------------------
+\printbibliography[heading=none]
 
 \end{document}
