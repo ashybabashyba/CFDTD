@@ -3,8 +3,6 @@ import math
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
-from mesh.MESH2D import Mesh
-
 class CFDTD2D():
     def __init__(self, mesh, initial_position, spread, cfl):
         self.mesh = mesh
@@ -67,5 +65,6 @@ class CFDTD2D():
             probeHz[:,:,n] = Hz[:,:]
             probeTime[n] = t
             t += self.dt
+            print ("Time step: %d of %d" % (n, nsteps-1))
 
         return probeEx, probeEy, probeHz, probeTime
