@@ -18,12 +18,13 @@ def inverseLineEquation(x0, x1):
         return lambda x: m_inv*(x - x0[1]) + x0[0]
 
 class Mesh():
-    def __init__(self, box_size, dx, dy, external_nodes_list_PEC=None, initial_wave_cell=None):
+    def __init__(self, box_size, dx, dy, external_nodes_list_PEC=None, initial_wave_cell=None, complement=None):
         self.dx = dx
         self.dy = dy
         self.boxSize = box_size
 
         self.initialCell = initial_wave_cell
+        self.complement = complement
 
         if self.initialCell is not None:
             initial_cell_list = list(self.initialCell)
@@ -151,11 +152,14 @@ class Mesh():
         top_row = (cell[1]+1)*self.dy
 
         cell_polygon = shape.Polygon([(left_column, bottom_row), (right_column, bottom_row), (right_column, top_row), (left_column, top_row)])
-
+        
         if len(self.nodesList) > 2:
             PEC_polygon = shape.Polygon(self.nodesList)
-
-            return shape.area(shape.difference(cell_polygon, PEC_polygon))
+            
+            if self.complement is None:
+                return shape.area(shape.difference(cell_polygon, PEC_polygon))
+            else:
+                return self.dx*self.dy - shape.area(shape.difference(cell_polygon, PEC_polygon))
         
         elif len(self.nodesList) == 2:
             if self.initialCell is None:
