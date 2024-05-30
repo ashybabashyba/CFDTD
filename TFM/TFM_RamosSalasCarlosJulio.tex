@@ -278,7 +278,23 @@ Let's first start by introducing the Maxwell's equation of electromagnetism and 
 
 \section{Introduction to the finite differences}
 
-Si 
+We want to find a function that is the solution to a specific differential equation, however, this is a hard problem in general and only rarely can an analytic formula be found for the solution. A finite difference method proceeds by replacing the aderivatives in the differential equation with finite differences aproximations \cite{LeVeque,Burden-2016}. For example, let's consider the Taylor approximation for $f(x+h)$ and $f(x-h)$
+
+\begin{align}
+    f(x+h) &= f(x) + h  f'(x) + \dfrac{h^2}{2}f''(x) + \mathcal{O}(h^3) = f(x) + h  f'(x) + \mathcal{O}(h^2), \label{eq:taylorFD1}\\
+    f(x-h) &= f(x) - h  f'(x) + \dfrac{h^2}{2}f''(x) + \mathcal{O}(h^3) = f(x) - h  f'(x) + \mathcal{O}(h^2),
+    \label{eq:taylorFD2}
+\end{align}
+in both equations it is possible to isolate the derivative, then we obtain:
+\begin{align}
+    f'(x) &= \dfrac{f(x+h)+f(x)}{h} + \mathcal{O}(h), \\
+    f'(x) &= \dfrac{f(x)-f(x-h)}{h} + \mathcal{O}(h).
+\end{align}
+If we ignore the order $h$ terms, we obtain the first order approximation for the derivative of the function with an error proportional to $h$. However, if we want to improve and reduce the error to order $h^2$, it's necessary to introduce the central finite difference approximation. If we consider $h=\Delta x/2$ and substract the equations \ref{eq:taylorFD1} and \ref{eq:taylorFD2} we can obtain the central finite difference as it follows
+\begin{equation}
+    f'(x) = \dfrac{f\left( x+ \dfrac{\Delta x}{2} \right) - f\left( x - \dfrac{\Delta x}{2} \right)}{\Delta x} + \mathcal{O}(\Delta x^2),
+\end{equation}
+we obtain then the approximation searched by ignoring the cuadratic order tearms. Since the error decreases faster in this case for smaller $\Delta x$, the equation will be more efficient to work with, for this reason, this approximation will be used for the discretization of the Maxwell's equations.
 
 
 % \chapter{Los enunciados}
