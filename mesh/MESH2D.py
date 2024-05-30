@@ -18,20 +18,18 @@ def inverseLineEquation(x0, x1):
         return lambda x: m_inv*(x - x0[1]) + x0[0]
 
 class Mesh():
-    def __init__(self, box_size, dx, dy, external_nodes_list_PEC=None, initial_wave_cell=None, complement=None):
+    def __init__(self, box_size, dx, initial_wave_cell, dy, external_nodes_list_PEC=None):
         self.dx = dx
         self.dy = dy
         self.boxSize = box_size
 
         self.initialCell = initial_wave_cell
-        self.complement = complement
+        
+        initial_cell_list = list(self.initialCell)
+        initial_cell_list[0] = initial_cell_list[0] + self.dx/2
+        initial_cell_list[1] = initial_cell_list[1] + self.dy/2
 
-        if self.initialCell is not None:
-            initial_cell_list = list(self.initialCell)
-            initial_cell_list[0] = initial_cell_list[0] + self.dx/2
-            initial_cell_list[1] = initial_cell_list[1] + self.dy/2
-
-            self.initialCell = tuple(initial_cell_list)
+        self.initialCell = tuple(initial_cell_list)
 
         self.gridEx = np.linspace(0, box_size, int(1 + box_size/dx))
         self.gridEy = np.linspace(0, box_size, int(1 + box_size/dy))
@@ -156,10 +154,10 @@ class Mesh():
         if len(self.nodesList) > 2:
             PEC_polygon = shape.Polygon(self.nodesList)
             
-            if self.complement is None:
-                return shape.area(shape.difference(cell_polygon, PEC_polygon))
-            else:
+            if PEC_polygon.contains(shape.Point(self.initialCell)):
                 return self.dx*self.dy - shape.area(shape.difference(cell_polygon, PEC_polygon))
+            else:
+                return shape.area(shape.difference(cell_polygon, PEC_polygon))
         
         elif len(self.nodesList) == 2:
             if self.initialCell is None:
