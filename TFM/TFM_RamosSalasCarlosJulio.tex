@@ -279,7 +279,6 @@ Let's first start by introducing the Maxwell's equation of electromagnetism and 
 \section{Introduction to the finite differences}
 
 We want to find a function that is the solution to a specific differential equation, however, this is a hard problem in general and only rarely can an analytic formula be found for the solution. A finite difference method proceeds by replacing the aderivatives in the differential equation with finite differences aproximations \cite{LeVeque,Burden-2016}. For example, let's consider the Taylor approximation for $f(x+h)$ and $f(x-h)$
-
 \begin{align}
     f(x+h) &= f(x) + h  f'(x) + \dfrac{h^2}{2}f''(x) + \mathcal{O}(h^3) = f(x) + h  f'(x) + \mathcal{O}(h^2), \label{eq:taylorFD1}\\
     f(x-h) &= f(x) - h  f'(x) + \dfrac{h^2}{2}f''(x) + \mathcal{O}(h^3) = f(x) - h  f'(x) + \mathcal{O}(h^2),
@@ -296,6 +295,35 @@ If we ignore the order $h$ terms, we obtain the first order approximation for th
 \end{equation}
 we obtain then the approximation searched by ignoring the cuadratic order tearms. Since the error decreases faster in this case for smaller $\Delta x$, the equation will be more efficient to work with, for this reason, this approximation will be used for the discretization of the Maxwell's equations.
 
+\section{One dimensional discrete Maxwell equations}
+
+First let's remember the time-dependent Maxwell's curl equations for free space \cite{jackson, griffiths}
+\begin{align}
+    &\frac{\partial \boldsymbol{E}}{\partial t}=\frac{1}{\varepsilon_{0}} \nabla \times \boldsymbol{H}, \\
+    &\frac{\partial \boldsymbol{H}}{\partial t}=-\frac{1}{\mu_{0}} \nabla \times \boldsymbol{E},
+\end{align}
+here $\boldsymbol{E}$ and $\boldsymbol{H}$ are vectors in three dimensions, with all the components being functions that depend of the spatial coordinates. For the one-dimensional case we can assume that the only non zero components of $\boldsymbol{E}$ and $\boldsymbol{H}$ are $E_x$ and $H_y$ respectively, then, the previous equations become
+\begin{align}
+    & \frac{\partial E_x}{\partial t}=-\frac{1}{\epsilon_0}  \frac{\partial H_y}{\partial z}, \\
+    & \frac{\partial H_y}{\partial t}=-\frac{1}{\mu_0} \frac{\partial E_x}{\partial z}.
+\end{align}
+These equations represents a plane wave traveling through the $z$ direction. Taking the central difference approimation discused above for both the temporal and spatial derivatives we obtain \cite{Sullivan2020}
+\begin{align}
+    \frac{E_x^{n+\frac{1}{2}}(k)-E_x^{n-\frac{1}{2}}(k)}{\Delta t} &=-\frac{1}{\epsilon_0}\frac{H_y^n \left(k+\frac{1}{2}\right) - H_y^n\left(k-\frac{1}{2}\right)}{\Delta x}, \\
+    \frac{H_y^{n+1} \left(k+\frac{1}{2}\right) -H_y^{n}\left( k +\frac{1}{2}\right)}{\Delta t} &=-\frac{1}{\mu_0}\frac{E_x^{n+\frac{1}{2}} \left(k+1\right) - E_x^{n+\frac{1}{2}}\left(k\right)}{\Delta x}.
+\end{align}
+In these two equations, the time step is represented by the superscripts ($n$) while the argument inside functions represent the spatial step ($k$), so the current time and distance are given by $t = \Delta t \cdot n$ and $z = \Delta x \cdot k$. Finally, we can rearrenge the last equations to obtain the next iterative equations
+\begin{align}
+    E_{x}^{n+1 / 2}(k) &=E_{x}^{n-1 / 2}(k)-\frac{\Delta t}{\varepsilon_{0} \cdot \Delta x}\left[H_{y}^{n}\left(k+\frac{1}{2}\right)-H_{y}^{n}\left(k-\frac{1}{2}\right)\right], \\
+    H_{y}^{n+1}\left(k+\frac{1}{2}\right) &=H_{y}^{n}\left(k+\frac{1}{2}\right)-\frac{\Delta t}{\mu_{0} \cdot \Delta x}\left[E_{x}^{n+1 / 2}(k+1)-E_{x}^{n+1 / 2}(k)\right].
+\end{align}
+It's important to notice that this formulation assume that the electric and magnetic fields are interleaved in both space and time, this is illustrated in the Figure \ref{fig:sullivaninterleaved}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.8]{Imagenes/Sullivan_interleaved.jpg}
+    \caption{Interleaving of the electric and magnetic fields in the FDTD formulation. Image taken from \cite{Sullivan2020}.}
+    \label{fig:sullivaninterleaved}
+\end{figure}
 
 % \chapter{Los enunciados}
 
