@@ -307,7 +307,7 @@ here $\boldsymbol{E}$ and $\boldsymbol{H}$ are vectors in three dimensions, with
     & \frac{\partial E_x}{\partial t}=-\frac{1}{\epsilon_0}  \frac{\partial H_y}{\partial z}, \\
     & \frac{\partial H_y}{\partial t}=-\frac{1}{\mu_0} \frac{\partial E_x}{\partial z}.
 \end{align}
-These equations represents a plane wave traveling through the $z$ direction. Taking the central difference approimation discused above for both the temporal and spatial derivatives we obtain \cite{Sullivan2020}
+These equations represents a plane wave traveling through the $z$ direction. Taking the central difference approximation discused above for both the temporal and spatial derivatives we obtain \cite{Sullivan2020}
 \begin{align}
     \frac{E_x^{n+\frac{1}{2}}(k)-E_x^{n-\frac{1}{2}}(k)}{\Delta t} &=-\frac{1}{\epsilon_0}\frac{H_y^n \left(k+\frac{1}{2}\right) - H_y^n\left(k-\frac{1}{2}\right)}{\Delta x}, \\
     \frac{H_y^{n+1} \left(k+\frac{1}{2}\right) -H_y^{n}\left( k +\frac{1}{2}\right)}{\Delta t} &=-\frac{1}{\mu_0}\frac{E_x^{n+\frac{1}{2}} \left(k+1\right) - E_x^{n+\frac{1}{2}}\left(k\right)}{\Delta x}.
@@ -324,6 +324,30 @@ It's important to notice that this formulation assume that the electric and magn
     \caption{Interleaving of the electric and magnetic fields in the FDTD formulation. Image taken from \cite{Sullivan2020}.}
     \label{fig:sullivaninterleaved}
 \end{figure}
+
+\section{Two dimensional discrete Maxwell equations}
+
+In two dimensional problems, the third dimension is invariant \cite{peterson1992electromagnetic}, for this reason, it's convenient to separate the fields in two groups and only work with one of those; the first one is the transversal magnetic mode (TM), which is composed of $H_x$, $H_y$ and $E_z$, and the other group is the transversal electric mode (TE), composed of $E_x$, $E_y$ and $H_z$. In this work we only consider the TE mode.
+
+\indent Considering again the time-dependent Maxwell's curl equations for the free space and by introducing the TE mode, we can obtain
+\begin{align}
+    \dfrac{\partial H_z}{\partial t} &= -\dfrac{1}{\mu_0} \left( \dfrac{\partial E_y}{\partial x} - \dfrac{\partial E_x}{\partial y} \right), \\
+    \dfrac{\partial E_x}{\partial t} &= \dfrac{1}{\epsilon_0} \dfrac{\partial H_z}{\partial y}, \\
+    \dfrac{\partial E_y}{\partial t} &= -\dfrac{1}{\epsilon_0} \dfrac{\partial H_z}{\partial x}. 
+\end{align}
+We can again use the central difference approximation but now with two spatial steps $\Delta x$ and $\Delta y$ to obtain the next iterive equation for the magnetic field
+\begin{equation}
+\begin{aligned}
+    H_z^{n + 1}\left( i + \dfrac{1}{2},j + \dfrac{1}{2} \right) = H_z^{n}\left( i + \dfrac{1}{2},j + \dfrac{1}{2} \right) &- \dfrac{\Delta t}{\mu_0 \Delta y}\left( E_y^{n + 1/2}(i+1,j) - E_y^{n + 1/2}(i,j) \right) \\
+                                                                                                                          &+ \dfrac{\Delta t}{\mu_0 \Delta x}\left( E_x^{n + 1/2}(i,j+1) - E_x^{n + 1/2}(i,j) \right),
+\end{aligned}
+\end{equation}
+and the next ones for the electric fields
+\begin{align}
+    E_x^{n+1}(i, j) &= E_x^{n}(i, j) + \dfrac{\Delta t}{\epsilon_0 \Delta y}\left[ H_z^{n+1/2}\left( i,j + \dfrac{1}{2} \right) - H_z^{n+1/2}\left( i,j - \dfrac{1}{2} \right) \right], \\
+    E_y^{n+1}(i, j) &= E_x^{n}(i, j) + \dfrac{\Delta t}{\epsilon_0 \Delta x}\left[ H_z^{n+1/2}\left( i + \dfrac{1}{2},j \right) - H_z^{n+1/2}\left( i - \dfrac{1}{2},j \right) \right].
+\end{align}
+
 
 % \chapter{Los enunciados}
 
