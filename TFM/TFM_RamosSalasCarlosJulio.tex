@@ -348,6 +348,23 @@ and the next ones for the electric fields
     E_y^{n+1}(i, j) &= E_x^{n}(i, j) + \dfrac{\Delta t}{\epsilon_0 \Delta x}\left[ H_z^{n+1/2}\left( i + \dfrac{1}{2},j \right) - H_z^{n+1/2}\left( i - \dfrac{1}{2},j \right) \right].
 \end{align}
 
+\section{Stability in the FDTD method}
+
+We have seen that the central difference approximation used converges to the analytic solution with cuadratic order, in this case, we have errors similar to $\mathcal{O}(\Delta t(\Delta t^2 + \Delta x^2))$ in one dimension and $\mathcal{O}(\Delta t(\Delta t^2 + \Delta x^2 + \Delta y^2))$ in the two dimension case, however, there are some restrictions in order to guarantee the convergence.
+
+\indent First let's start with the restriction of the time step $\Delta t$. The maximum value this parameter can have is determined by the \textit{CFL} condition, the physical meaning of this condition states that the electromagnetic wave must not pass through more than one cell in just one time step \cite{kunz1993finite}, and this have mathematical sense since the central difference approximation only consideres the nearest neighbors to estimate the evolution of the cell. In general, for a 3D rectangular grid, we have
+\begin{equation}
+    c \Delta t \leq \left( \dfrac{1}{(\Delta x)^2} + \dfrac{1}{(\Delta y)^2} + \dfrac{1}{(\Delta z)^2} \right)^{-1/2} \equiv d^{-1/2},
+\end{equation}
+where $c$ represents the speed of the electromagnetic wave (speed of light in the free space case). We can convert the inequality into an equality by multiplying by a constant $k$ less than 1 on the right side, so we finally have
+\begin{equation}
+    \Delta t = \dfrac{kd^{-1/2}}{c}.
+    \label{eq:CFL}
+\end{equation}
+
+Finally, the spatial step can not be selected at random either. The foundamental restriction is that the cell size must be smaller than the smallest wavelenght of the electromagnetic wave \cite{kunz1993finite}. A frequently used rule states that we need to have at least 10 cells per wavelenght.
+
+\chapter{Conformal extension of the FDTD method}
 
 % \chapter{Los enunciados}
 
