@@ -12,7 +12,7 @@ def test_visual_animation():
     mesh = Mesh(box_size=100.0, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell=initial_cell)
     mesh.plotElectricFieldGrid()
     pulse = InitialPulse(mesh=mesh, initial_position=initial_cell, spread=5.0, pulse_type='Magnetic Gaussian')
-    solver = CFDTD2D(mesh, initialPulse=pulse, cfl=0.9)
+    solver = CFDTD2D(mesh, initialPulse=pulse, cfl=0.5)
     nsteps = int(100 / solver.dt)
     probeEx, probeEy, probeHz, probeTime = solver.run(nsteps)
 

@@ -22,7 +22,7 @@ class InitialPulse():
     
 def magneticGaussian(H0, mesh, center, spread):
     initialH = np.zeros(H0.shape)
-    for j in range(mesh.gridHx.size):
-        for i in range(mesh.gridHy.size):
+    for i in range(mesh.gridHx.size):
+        for j in range(mesh.gridHy.size):
             initialH[i,j] = math.exp(- ((mesh.gridHx[i]-center[0])**2 + (mesh.gridHy[j]-center[1])**2) /math.sqrt(2.0) / spread)     
     return initialH

@@ -10,8 +10,8 @@ def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt):
     Ey_next = np.zeros(Ey_prev.shape)
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
-            Ex_next[j][i] = Ex_prev[j][i] + dt/dy * (Hz_prev[j][i] - Hz_prev[j  ][i-1])
-            Ey_next[j][i] = Ey_prev[j][i] - dt/dx * (Hz_prev[j][i] - Hz_prev[j-1][i  ])
+            Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
+            Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
     
     return Ex_next, Ey_next
 
@@ -21,8 +21,8 @@ def magneticFieldStep(Ex_prev, Ey_prev, Hz_prev, dt, area, left, right, top, bot
     for i in range(Hz_prev.shape[0]):
         for j in range(Hz_prev.shape[1]):
             if area[i,j] != 0:
-                Hz_next[j][i] = Hz_prev[j][i] - dt/area[i,j] * (right[i,j]*Ey_prev[j+1][i  ] - left[i,j]*Ey_prev[j][i] +\
-                                                                bottom[i,j]*Ex_prev[j  ][i] - top[i,j]*Ex_prev[j][i+1])
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i+1][j  ] - left[i,j]*Ey_prev[i][j] +\
+                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i][j+1])
 
     return Hz_next    
 
@@ -93,15 +93,15 @@ class CFDTD2D():
         ax.set_xlabel('X coordinate [m]')
         ax.set_ylabel('Y coordinate [m]')
         line = plt.imshow(probeHz[:,:,0], animated=True, vmin=-0.5, vmax=0.5)
-        timeText = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+        timeText = ax.text(0.02, 0.95, '')
 
         def init():
-            line.set_array(probeHz[:,:,0])
+            line.set_array(np.transpose(probeHz[:,:,0]))
             timeText.set_text('')
             return line, timeText
 
         def animate(i):
-            line.set_array(probeHz[:,:,i])
+            line.set_array(np.transpose(probeHz[:,:,i]))
             timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
             return line, timeText
 
