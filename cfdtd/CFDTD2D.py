@@ -26,29 +26,6 @@ def magneticFieldStep(Ex_prev, Ey_prev, Hz_prev, dt, area, left, right, top, bot
 
     return Hz_next    
 
-class InitialPulse():
-    def __init__(self, initial_position, spread, pulse_type):
-        self.center = initial_position
-        self.spread = spread
-        self.type = pulse_type
-
-    def magneticGaussian(self, H0, mesh):
-        initialH = np.zeros(H0.shape)
-        for j in range(mesh.gridHx.size):
-            for i in range(mesh.gridHy.size):
-                initialH[i,j] = math.exp(- ((mesh.gridHx[i]-self.center[0])**2 + (mesh.gridHy[j]-self.center[1])**2) /math.sqrt(2.0) / self.spread)
-        
-        return initialH
-        
-
-    def pulse(self, dx, dt, step):
-        if self.type == "Magnetic Gaussian":
-            E0 = dt*np.exp(-0.5 * ((self.initialTime - dt*step) / self.spread) ** 2)
-            H0 = dt*np.exp(-0.5 * ((self.initialTime - dt/2 - dx/2 - dt*step) / self.spread) ** 2)
-            return E0, H0
-        else:
-            raise ValueError("Pulse not defined")
-
 class CFDTD2D():
     def __init__(self, mesh, initialPulse, cfl):
         self.mesh = mesh
@@ -65,7 +42,6 @@ class CFDTD2D():
         Ex = np.zeros((self.mesh.gridEx.size, self.mesh.gridEy.size))
         Ey = np.zeros((self.mesh.gridEx.size, self.mesh.gridEy.size))
         Hz = np.zeros((self.mesh.gridHx.size, self.mesh.gridHy.size))
-        
         return Ex, Ey, Hz
     
     def buildFieldsInAllTimeSteps(self, nsteps):
@@ -79,12 +55,7 @@ class CFDTD2D():
     def run(self, nsteps):
         Ex, Ey, Hz = self.buildFields()
         probeEx, probeEy, probeHz, probeTime = self.buildFieldsInAllTimeSteps(nsteps)
-
-        if self.pulse.type == 'Magnetic Gaussian':
-            Hz = self.pulse.magneticGaussian(Hz, self.mesh)
-        else:
-            raise ValueError('Pulse type not defined')
-
+        Ex, Ey, Hz = self.pulse.buildPulse()
         t=0.0
 
         cell_area = np.array([[self.mesh.getCellArea((i, j)) for j in range(self.mesh.gridHy.size)] for i in range(self.mesh.gridHx.size)])
