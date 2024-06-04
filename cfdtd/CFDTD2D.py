@@ -88,11 +88,11 @@ class CFDTD2D():
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]])
-        ax.set_ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]])
+        ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
+        ax.set_ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
         ax.set_xlabel('X coordinate [m]')
         ax.set_ylabel('Y coordinate [m]')
-        line = plt.imshow(probeHz[:,:,0], animated=True, vmin=-0.5, vmax=0.5)
+        line = plt.imshow(np.transpose(probeHz[:,:,0]), animated=True, vmin=-0.5, vmax=0.5)
         timeText = ax.text(0.02, 0.95, '')
 
         def init():
