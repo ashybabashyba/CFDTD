@@ -16,7 +16,7 @@ class InitialPulse():
     def buildPulse(self):
         if self.type == "Magnetic Gaussian":
             self.Hz = magneticGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
-        if self.type == "Rectangular Waveguide 10":
+        elif self.type == "Rectangular Waveguide 10":
             self.Hz = rectangularWaveguide10(H0=self.Hz, mesh=self.mesh)
         else:
             raise ValueError('Pulse type not defined')

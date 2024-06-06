@@ -16,7 +16,7 @@ def test_visual_animation():
     nsteps = int(100 / solver.dt)
     probeEx, probeEy, probeHz, probeTime = solver.run(nsteps)
 
-    solver.plotMagneticFieldAnimatio(nsteps)
+    solver.plotMagneticFieldAnimation(nsteps)
 
 def test_rectangular_waveguide10():
     node_list = [(25.5,10.5), (75.5,10.5), (75.5, 95.5), (25.5, 95.5)]
