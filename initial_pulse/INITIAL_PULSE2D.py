@@ -16,6 +16,8 @@ class InitialPulse():
     def buildPulse(self):
         if self.type == "Magnetic Gaussian":
             self.Hz = magneticGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
+        if self.type == "Rectangular Waveguide 10":
+            self.Hz = rectangularWaveguide10(H0=self.Hz, mesh=self.mesh)
         else:
             raise ValueError('Pulse type not defined')
         return self.Ex, self.Ey, self.Hz
@@ -25,4 +27,15 @@ def magneticGaussian(H0, mesh, center, spread):
     for i in range(mesh.gridHx.size):
         for j in range(mesh.gridHy.size):
             initialH[i,j] = math.exp(- ((mesh.gridHx[i]-center[0])**2 + (mesh.gridHy[j]-center[1])**2) /math.sqrt(2.0) / spread)     
+    return initialH
+
+def rectangularWaveguide10(H0, mesh):
+    initialH = np.zeros(H0.shape)
+    conformalCells, outsideNonConformalCells, insideNonConformalCells = mesh.getCellSeparationByType()
+    a = mesh.nodesList[0][0] - mesh.nodesList[1][0]
+    for i in range(mesh.gridHx.size):
+        for j in range(mesh.gridHy.size):
+            if (i,j) not in outsideNonConformalCells:
+                initialH[i,j] = np.cos(np.pi*(i+1/2)/a)
+        
     return initialH
