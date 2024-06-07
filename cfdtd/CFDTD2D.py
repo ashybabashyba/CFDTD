@@ -5,13 +5,13 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
 @jit(nopython=True, parallel=True)
-def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt):
+def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, area):
     Ex_next = np.zeros(Ex_prev.shape)
     Ey_next = np.zeros(Ey_prev.shape)
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
-            Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
-            Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
+            Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
+            Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
     
     return Ex_next, Ey_next
 
@@ -21,8 +21,8 @@ def magneticFieldStep(Ex_prev, Ey_prev, Hz_prev, dt, area, left, right, top, bot
     for i in range(Hz_prev.shape[0]):
         for j in range(Hz_prev.shape[1]):
             if area[i,j] != 0:
-                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i+1][j  ] - left[i,j]*Ey_prev[i][j] +\
-                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i][j+1])
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i][j+1] - left[i,j]*Ey_prev[i][j] +\
+                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i+1][j])
 
     return Hz_next    
 
@@ -68,7 +68,7 @@ class CFDTD2D():
         for n in range(nsteps):
             Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
                    
-            Ex, Ey = electricFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt)
+            Ex, Ey = electricFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area=cell_area)
 
             Ex[ :][ 0] = 0.0
             Ex[ :][-1] = 0.0
@@ -111,7 +111,7 @@ class CFDTD2D():
 
         plt.show()
 
-    def plotElecticFieldXAnimation(self, nsteps):
+    def plotElectricFieldXAnimation(self, nsteps):
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
