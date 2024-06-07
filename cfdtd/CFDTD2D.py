@@ -66,6 +66,8 @@ class CFDTD2D():
 
 
         for n in range(nsteps):
+            Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
+                   
             Ex, Ey = electricFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt)
 
             Ex[ :][ 0] = 0.0
@@ -73,7 +75,6 @@ class CFDTD2D():
             Ey[ 0][ :] = 0.0
             Ey[-1][ :] = 0.0  
 
-            Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)       
             
             probeEx[:,:,n] = Ex[:,:]
             probeEy[:,:,n] = Ey[:,:]
@@ -102,6 +103,32 @@ class CFDTD2D():
 
         def animate(i):
             line.set_array(np.transpose(probeHz[:,:,i]))
+            timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
+            return line, timeText
+
+        anim = animation.FuncAnimation(fig, animate, init_func=init,
+                                    frames=nsteps, interval=50, blit=True)
+
+        plt.show()
+
+    def plotElecticFieldXAnimation(self, nsteps):
+        probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
+        ax.set_ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
+        ax.set_xlabel('X coordinate [m]')
+        ax.set_ylabel('Y coordinate [m]')
+        line = plt.imshow(np.transpose(probeEx[:,:,0]), animated=True, vmin=-0.5, vmax=0.5)
+        timeText = ax.text(0.02, 0.95, '')
+
+        def init():
+            line.set_array(np.transpose(probeEx[:,:,0]))
+            timeText.set_text('')
+            return line, timeText
+
+        def animate(i):
+            line.set_array(np.transpose(probeEx[:,:,i]))
             timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
             return line, timeText
 
