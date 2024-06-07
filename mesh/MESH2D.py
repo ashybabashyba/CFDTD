@@ -257,10 +257,17 @@ class Mesh():
                     conformal_cells.append((i,j))
                 else:
                     if len(self.nodesList) != 2:
-                        if np.isclose(self.getCellArea((i,j)), self.dx * self.dy):
-                            outside_non_conformal_cells.append((i,j))
+                        PEC_polygon = shape.Polygon(self.nodesList)
+                        if PEC_polygon.contains(shape.Point(self.initialCell)):
+                            if np.isclose(self.getCellArea((i,j)), self.dx * self.dy):
+                                inside_non_conformal_cells.append((i,j))
+                            else:
+                                outside_non_conformal_cells.append((i,j))
                         else:
-                            inside_non_conformal_cells.append((i,j))
+                            if np.isclose(self.getCellArea((i,j)), self.dx * self.dy):
+                                outside_non_conformal_cells.append((i,j))
+                            else:
+                                inside_non_conformal_cells.append((i,j))
                       
                     else:
                         non_conformal_cells.append((i,j))
