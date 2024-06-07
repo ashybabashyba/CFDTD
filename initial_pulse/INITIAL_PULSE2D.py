@@ -38,6 +38,6 @@ def rectangularResonantCavity11(H0, mesh):
     y0 = mesh.nodesList[0][1]
     for i in range(mesh.gridHx.size):
         for j in range(mesh.gridHy.size):
-            if (i,j) in insideNonConformalCells:
+            if (i,j) not in outsideNonConformalCells:
                 initialH[i,j] = np.cos(np.pi*(mesh.gridHx[i] - x0)/a)*np.cos(np.pi*(mesh.gridHy[j] - y0)/b)
     return initialH
