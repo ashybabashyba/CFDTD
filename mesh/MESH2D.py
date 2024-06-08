@@ -86,6 +86,16 @@ class Mesh():
             self.rows.append(self.gridEx.tolist())
         return self.columns, self.rows
 
+    def polygonPEC(self):
+        auxiliar_PEC_polygon = shape.Polygon(self.nodesList)
+        box_polygon = shape.Polygon([(0,0), (self.boxSize, 0), (self.boxSize, self.boxSize), (0, self.boxSize)])
+        
+        if auxiliar_PEC_polygon.contains(shape.Point(self.initialCell)):
+            return box_polygon.difference(auxiliar_PEC_polygon)
+        
+        else:
+            return auxiliar_PEC_polygon
+
     def getIntersectionPoints(self):
         self.columns_intersection_points = []
         self.rows_intersection_points = []
@@ -205,8 +215,8 @@ class Mesh():
         bottom_edge = shape.LineString([(left_column, bottom_row), (right_column, bottom_row)])
 
         if len(self.nodesList) > 2:
-            edge_lengths = {"left": self.dy, "right": self.dy, "top": self.dx, "bottom": self.dx}
-            PEC_polygon = shape.Polygon(self.nodesList)
+            edge_lengths = {"left": 0, "right": 0, "top": 0, "bottom": 0}
+            PEC_polygon = self.polygonPEC()
             difference_cell = shape.difference(cell_polygon, PEC_polygon)
 
             if shape.intersects(difference_cell, left_edge):
@@ -268,7 +278,7 @@ class Mesh():
                                 outside_non_conformal_cells.append((i,j))
                             else:
                                 inside_non_conformal_cells.append((i,j))
-                      
+                
                     else:
                         non_conformal_cells.append((i,j))
                     
