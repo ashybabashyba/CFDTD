@@ -288,6 +288,15 @@ class Mesh():
         elif len(self.nodesList) == 2:
             return conformal_cells, non_conformal_cells
 
+    def getMinMaxIndexInsideNonConformalCells(self):
+        conformalCells, outsideNonConformalCells, insideNonConformalCells = self.getCellSeparationByType()
+
+        xmin_index = min(cell[0] for cell in insideNonConformalCells)
+        xmax_index = max(cell[0] for cell in insideNonConformalCells)
+        ymin_index = min(cell[1] for cell in insideNonConformalCells)
+        ymax_index = max(cell[1] for cell in insideNonConformalCells)
+
+        return xmin_index, xmax_index, ymin_index, ymax_index
         
 
     def plotElectricFieldGrid(self):
