@@ -18,6 +18,8 @@ class InitialPulse():
             self.Hz = magneticGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
         elif self.type == "Rectangular Resonant Cavity 11":
             self.Hz = rectangularResonantCavity11(H0=self.Hz, mesh=self.mesh)
+        elif self.type == "Non Conformal Rectangular Resonant Cavity 11":
+            self.Hz = rectangularResonantCavity11NonConformal(H0=self.Hz, mesh=self.mesh)
         else:
             raise ValueError('Pulse type not defined')
         return self.Ex, self.Ey, self.Hz
@@ -39,5 +41,18 @@ def rectangularResonantCavity11(H0, mesh):
     for i in range(mesh.gridHx.size):
         for j in range(mesh.gridHy.size):
             if (i,j) not in outsideNonConformalCells:
-                initialH[i,j] = np.cos(np.pi*(mesh.gridHx[i] - x0)/a)*np.cos(np.pi*(mesh.gridHy[j] - y0)/b)
+                initialH[i,j] = np.cos(4*np.pi*(mesh.gridHx[i] - x0)/a)*np.cos(4*np.pi*(mesh.gridHy[j] - y0)/b)
+    return initialH
+
+def rectangularResonantCavity11NonConformal(H0, mesh):
+    initialH = np.zeros(H0.shape)
+    conformalCells, outsideNonConformalCells, insideNonConformalCells = mesh.getCellSeparationByType()
+    a = np.abs(mesh.nodesList[0][0] - mesh.nodesList[1][0])
+    b = np.abs(mesh.nodesList[0][1] - mesh.nodesList[3][1])
+    x0 = mesh.nodesList[0][0]
+    y0 = mesh.nodesList[0][1]
+    for i in range(mesh.gridHx.size):
+        for j in range(mesh.gridHy.size):
+            if (i,j) in insideNonConformalCells:
+                initialH[i,j] = np.cos(4*np.pi*(mesh.gridHx[i] - x0 + mesh.dx/2)/a)*np.cos(4*np.pi*(mesh.gridHy[j] - y0 + mesh.dy/2)/b)
     return initialH
