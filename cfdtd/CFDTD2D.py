@@ -5,13 +5,15 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
 @jit(nopython=True, parallel=True)
-def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, area):
+def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, bottom, area):
     Ex_next = np.zeros(Ex_prev.shape)
     Ey_next = np.zeros(Ey_prev.shape)
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
-            Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
-            Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
+            if not np.isclose(left[i,j], 0):
+                Ex_next[i][j] = Ex_prev[i][j] + dt/left[i,j] * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
+            if not np.isclose(bottom[i,j], 0):
+                Ey_next[i][j] = Ey_prev[i][j] - dt/bottom[i,j] * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
     
     return Ex_next, Ey_next
 
@@ -21,18 +23,46 @@ def magneticFieldStep(Ex_prev, Ey_prev, Hz_prev, dt, area, left, right, top, bot
     for i in range(Hz_prev.shape[0]):
         for j in range(Hz_prev.shape[1]):
             if area[i,j] != 0:
-                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i][j+1] - left[i,j]*Ey_prev[i][j] +\
-                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i+1][j])
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (bottom[i,j]*Ey_prev[i][j+1] - top[i,j]*Ey_prev[i][j] +\
+                                                                right[i,j]*Ex_prev[i  ][j] - left[i,j]*Ex_prev[i+1][j])
 
     return Hz_next    
 
+@jit(nopython=True, parallel=True)
+def electricFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, bottom, area, xmin_index, xmax_index, ymin_index, ymax_index):
+    Ex_next = np.zeros(Ex_prev.shape)
+    Ey_next = np.zeros(Ey_prev.shape)
+    for i in range(1, Ex_prev.shape[0]-1):
+        for j in range(1, Ex_prev.shape[1]-1):
+            if np.isclose(area[i,j], 1):
+                if (i != xmin_index and i !=xmax_index+1) and (j != ymin_index and j != ymax_index+1): 
+                    if not np.isclose(left[i,j], 0):
+                        Ex_next[i][j] = Ex_prev[i][j] + dt/left[i,j] * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
+                    if not np.isclose(bottom[i,j], 0):
+                        Ey_next[i][j] = Ey_prev[i][j] - dt/bottom[i,j] * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
+    
+    return Ex_next, Ey_next
+
+@jit(nopython=True, parallel=True)
+def magneticFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dt, area, left, right, top, bottom):
+    Hz_next = np.zeros(Hz_prev.shape)
+    for i in range(Hz_prev.shape[0]):
+        for j in range(Hz_prev.shape[1]):
+            if np.isclose(area[i,j], 1):
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (bottom[i,j]*Ey_prev[i][j+1] - top[i,j]*Ey_prev[i][j] +\
+                                                                right[i,j]*Ex_prev[i  ][j] - left[i,j]*Ex_prev[i+1][j])
+
+    return Hz_next 
+
 class CFDTD2D():
-    def __init__(self, mesh, initialPulse, cfl):
+    def __init__(self, mesh, initialPulse, cfl, solver_type=None):
         self.mesh = mesh
         self.pulse = initialPulse
         self.center = self.pulse.center
         self.cfl = cfl
         self.spread = self.pulse.spread
+
+        self.SolverType = solver_type
 
         self.dx = self.mesh.dx
         self.dy = self.mesh.dy
@@ -64,17 +94,23 @@ class CFDTD2D():
         cell_lengths_bottom = np.array([[self.mesh.getCellLengths((i, j))["bottom"] for j in range(self.mesh.gridHy.size)] for i in range(self.mesh.gridHx.size)])
         cell_lengths_top = np.array([[self.mesh.getCellLengths((i, j))["top"] for j in range(self.mesh.gridHy.size)] for i in range(self.mesh.gridHx.size)])
 
+        xmin, xmax, ymin, ymax = self.mesh.getMinMaxIndexInsideNonConformalCells()
 
         for n in range(nsteps):
-            Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
+            if self.SolverType == "Non Conformal":
+                Ex, Ey = electricFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area= cell_area,left=cell_lengths_left, bottom=cell_lengths_bottom, xmin_index=xmin, xmax_index=xmax, ymin_index=ymin, ymax_index=ymax)
+            else:
+                Ex, Ey = electricFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area= cell_area,left=cell_lengths_left, bottom=cell_lengths_bottom)
                    
-            Ex, Ey = electricFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area=cell_area)
-
             Ex[ :][ 0] = 0.0
             Ex[ :][-1] = 0.0
             Ey[ 0][ :] = 0.0
             Ey[-1][ :] = 0.0  
 
+            if self.SolverType == "Non Conformal":
+                Hz = magneticFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
+            else:
+                Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
             
             probeEx[:,:,n] = Ex[:,:]
             probeEy[:,:,n] = Ey[:,:]
@@ -129,6 +165,32 @@ class CFDTD2D():
 
         def animate(i):
             line.set_array(np.transpose(probeEx[:,:,i]))
+            timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
+            return line, timeText
+
+        anim = animation.FuncAnimation(fig, animate, init_func=init,
+                                    frames=nsteps, interval=50, blit=True)
+
+        plt.show()
+
+    def plotElectricFieldYAnimation(self, nsteps):
+        probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
+        ax.set_ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
+        ax.set_xlabel('X coordinate [m]')
+        ax.set_ylabel('Y coordinate [m]')
+        line = plt.imshow(np.transpose(probeEy[:,:,0]), animated=True, vmin=-0.5, vmax=0.5)
+        timeText = ax.text(0.02, 0.95, '')
+
+        def init():
+            line.set_array(np.transpose(probeEy[:,:,0]))
+            timeText.set_text('')
+            return line, timeText
+
+        def animate(i):
+            line.set_array(np.transpose(probeEy[:,:,i]))
             timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
             return line, timeText
 
