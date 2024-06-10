@@ -355,17 +355,34 @@ We have seen that the central difference approximation used converges to the ana
 
 \indent First let's start with the restriction of the time step $\Delta t$. The maximum value this parameter can have is determined by the \textit{CFL} condition, the physical meaning of this condition states that the electromagnetic wave must not pass through more than one cell in just one time step \cite{kunz1993finite}, and this have mathematical sense since the central difference approximation only consideres the nearest neighbors to estimate the evolution of the cell. In general, for a 3D rectangular grid, we have
 \begin{equation}
-    c \Delta t \leq \left( \dfrac{1}{(\Delta x)^2} + \dfrac{1}{(\Delta y)^2} + \dfrac{1}{(\Delta z)^2} \right)^{-1/2} \equiv d^{-1/2},
+    c \Delta t \leq \left( \dfrac{1}{(\Delta x)^2} + \dfrac{1}{(\Delta y)^2} + \dfrac{1}{(\Delta z)^2} \right)^{-1/2} \equiv d,
 \end{equation}
 where $c$ represents the speed of the electromagnetic wave (speed of light in the free space case). We can convert the inequality into an equality by multiplying by a constant $k$ less than 1 on the right side, so we finally have
 \begin{equation}
-    \Delta t = \dfrac{kd^{-1/2}}{c}.
+    \Delta t = \dfrac{kd}{c}.
     \label{eq:CFL}
 \end{equation}
 
 Finally, the spatial step can not be selected at random either. The foundamental restriction is that the cell size must be smaller than the smallest wavelenght of the electromagnetic wave \cite{kunz1993finite}. A frequently used rule states that we need to have at least 10 cells per wavelenght.
 
 \chapter{Conformal extension of the FDTD method}
+
+Using the FDTD method with rectangular grid to analyze objects with curved metallic surfaces not only introduces errors due to inaccurate approximation of the geometry \cite{97384}. If we want to extend the FDTD method to solve curved surfaces or irregularities composed of perfect electric conductor, it's necessary to introduce the Conformal Finite Differece in Time Domain method (CFDTD). In this chapter we introduce the CFDTD basics.
+
+\section{Introduction to CFDTD}
+
+The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two dimensional PEC using a locally conformal grid \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}. For two dimensional problems we can consider for example a quadrant of the cross section of a circular resonator shown in Figure \ref{fig:DeyMittraMesh}; we can see that the magnetic fields over the cells that don't intersects with the curve can be solved with the regular FDTD method, however, we can't use the same algorithm for the others cells; this is because some neighbour nodes of the electric field discretization are no longer able to interact due to the presence of the PEC surface between them. For this reason, we need to introduce another formulation for the FDTD that can be generalized and used for the CFDTD case.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1.0]{Imagenes/DeyMittra_2DMeshExample.jpg}
+    \caption{Example of a rectangular mesh on a curved PEC surface. Image taken from \cite{Dey1997ALC}.}
+    \label{fig:DeyMittraMesh}
+\end{figure}
+
+\section{The Finite Integration Technique}
+
+
 
 % \chapter{Los enunciados}
 
