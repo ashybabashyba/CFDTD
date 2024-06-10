@@ -54,5 +54,5 @@ def rectangularResonantCavity11NonConformal(H0, mesh):
     for i in range(mesh.gridHx.size):
         for j in range(mesh.gridHy.size):
             if (i,j) in insideNonConformalCells:
-                initialH[i,j] = np.cos(4*np.pi*(mesh.gridHx[i] - x0 + mesh.dx/2)/a)*np.cos(4*np.pi*(mesh.gridHy[j] - y0 + mesh.dy/2)/b)
+                initialH[i,j] = np.cos(4*np.pi*(mesh.gridHx[i] - x0 + mesh.dx/2)/(a-mesh.dx))*np.cos(4*np.pi*(mesh.gridHy[j] - y0 + mesh.dy/2)/(b-mesh.dy))
     return initialH
