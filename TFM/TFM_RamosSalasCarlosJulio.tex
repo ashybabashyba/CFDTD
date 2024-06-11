@@ -410,6 +410,17 @@ In the uniform rectangular grid case, if there is no curved surface in the mesh,
 
 The great adventage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always cero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
 
+\section{Stability in the CFDTD method}
+
+As we have seen, the CFDTD method follows a different scheme that the FDTD method in the cells where the curved PEC surface intersects the mesh, since the area and the lengths of some cells changes, we need to find a stability that depends on these variables, then, we need a more restrictive time step stability condition. For example, the condition reported in \cite{7518629} establish that
+\begin{equation}
+    \Delta t_k = \sqrt{3} \sqrt{\dfrac{A_k^{ratio}}{\max \left( l_k^{ratio} \right)}}\Delta t_{CFL} = h_{0, k} \Delta t_{CFL},
+\label{eq:StabilityAngulo}
+\end{equation}
+with $h_{0, k} = \sqrt{3} \sqrt{A_k^{ratio}/\max \left( l_k^{ratio} \right)} \leq 1$. In this equation $k$ represents one of the posibles remaining areas when we consider the cell cut by the curve, $A^{ratio}$ represent the quotient between the remaining area from the usual area of the cell and $l^{ratio}$ the quotient between the cut length of the edge from the usual length (considering al the four posible lengths per cell). This time step is similar to the time step reported in \cite{1638381}, the only difference is the factor $\sqrt{3}$, however, both of these criterias are made for 3D problems, in case we want to work with 1D or 2D problems, we can change the previously factor to $1$ or $\sqrt{2}$ respectively.
+
+Returning to the equation \ref{eq:StabilityAngulo}, there is a problem with this formulation, to guarantee the stability of the scheme, we need to look over all the cells of the discretization, making the algorithm inefficient or slow for large problems with short spatial step or problems with complex geometries that require very detailed refinement of the mesh. For this reason, the study of local stability conditions that require only specific information about the problem has been a research objective for both CFDTD and FDTD \cite{7779120}.
+
 % \chapter{Los enunciados}
 
 % \section{Teoremas y demostraciones}
