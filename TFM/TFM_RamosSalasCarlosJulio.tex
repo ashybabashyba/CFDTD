@@ -339,9 +339,10 @@ In two dimensional problems, the third dimension is invariant \cite{peterson1992
 We can again use the central difference approximation but now with two spatial steps $\Delta x$ and $\Delta y$ to obtain the next iterive equation for the magnetic field
 \begin{equation}
 \begin{aligned}
-    H_z^{n + 1}\left( i + \dfrac{1}{2},j + \dfrac{1}{2} \right) = H_z^{n}\left( i + \dfrac{1}{2},j + \dfrac{1}{2} \right) &- \dfrac{\Delta t}{\mu_0 \Delta y}\left( E_y^{n + 1/2}(i+1,j) - E_y^{n + 1/2}(i,j) \right) \\
-                                                                                                                          &+ \dfrac{\Delta t}{\mu_0 \Delta x}\left( E_x^{n + 1/2}(i,j+1) - E_x^{n + 1/2}(i,j) \right),
+    H_z^{n + 1}\left( i + \dfrac{1}{2},j + \dfrac{1}{2} \right) = H_z^{n}\left( i + \dfrac{1}{2},j + \dfrac{1}{2} \right) &- \dfrac{\Delta t}{\mu_0 \Delta x}\left( E_y^{n + 1/2}(i+1,j) - E_y^{n + 1/2}(i,j) \right) \\
+                                                                                                                          &+ \dfrac{\Delta t}{\mu_0 \Delta y}\left( E_x^{n + 1/2}(i,j+1) - E_x^{n + 1/2}(i,j) \right),
 \end{aligned}
+\label{eq:FDTDMagneticField2D}
 \end{equation}
 and the next ones for the electric fields
 \begin{align}
@@ -380,9 +381,34 @@ The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two
     \label{fig:DeyMittraMesh}
 \end{figure}
 
-\section{The Finite Integration Technique}
+\section{The Dey-Mittra algorithm}
 
+Let's consider a two dimensional rectangular grid discretization same as the FDTD case. Now, let's consider the Faraday equation in the integral form for the free space given by
+\begin{equation}
+    \oint_{\partial S} \boldsymbol{E} \cdot d \vec{l} = -\dfrac{d}{dt} \int_{S} \mu_0 \boldsymbol{H} \cdot d\vec{s}.
+    \label{eq:FaradayIntegralEquation}
+\end{equation}
+If we assume that the electric fields are constant along the edges between the nodes, that the magnetics fields are also constant in the worked cell and if we are working on the TE mode, we can obtain from the equation \ref{eq:FaradayIntegralEquation} the following relation
+\begin{equation}
+\begin{aligned}
+    -\mu_0*A(i,j)\dfrac{\partial}{\partial t} H_z\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= E_x(i,j)*l_x(i,j) - E_x(i,j+1)*l_x(i,j+1) \\
+                                                                                                   &+ E_y(i+1,j)*l_y(i+1,j) - E_y(i,j)*l_y(i,j),  
+\end{aligned}
+\label{eq:FaradayIntegralEquationRectangularGrid}
+\end{equation}
+where $l_x(i,j)$ and $l_y(i,j)$ represents the length of the edge where is assumed the electric node $E_x(i,j)$ and $E_y(i,j)$ respectively, and $A(i,j)$ the area where the magnetic field $H_z (i + 1/2, j + 1/2)$ is placed. We also assumed that the area is constant in the time so it can separated from the time derivative. Finally we take the central difference aproximation for the time derivative and rearranging we obtain
+\begin{equation}
+    \begin{aligned}
+        H_z^{n + 1}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= H_z^{n}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) - \dfrac{\Delta t}{\mu_0 * A(i,j)} \times \\
+                                                                       &\times \big[ E^{n + 1/2}_x(i,j)*l_x(i,j)- E^{n + 1/2}_x(i,j+1)*l_x(i,j+1)  \\
+                                                                       &+  E^{n + 1/2}_y(i+1,j)*l_y(i+1,j) - E^{n + 1/2}_y(i,j)*l_y(i,j)\big].  
+    \end{aligned}
+\label{eq:FaradayIntegralEquationRectangularGrid}
+\end{equation}
 
+In the uniform rectangular grid case, if there is no curved surface in the mesh, we have $l_x = \Delta x$, $l_y = \Delta y$ and $A = \Delta x \Delta y$ for any pair $i,j$, then, by replacing these values into the equation \ref{eq:FaradayIntegralEquationRectangularGrid}, we can obtain again the magnetic field iterative formula presented in the equation \ref{eq:FDTDMagneticField2D}.
+
+The great adventage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always cero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
 
 % \chapter{Los enunciados}
 
