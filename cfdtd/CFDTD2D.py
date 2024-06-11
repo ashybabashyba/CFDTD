@@ -35,11 +35,10 @@ def electricFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, b
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
             if np.isclose(area[i,j], 1):
-                if (i != xmin_index and i !=xmax_index+1) and (j != ymin_index and j != ymax_index+1): 
-                    if not np.isclose(left[i,j], 0):
-                        Ex_next[i][j] = Ex_prev[i][j] + dt/left[i,j] * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
-                    if not np.isclose(bottom[i,j], 0):
-                        Ey_next[i][j] = Ey_prev[i][j] - dt/bottom[i,j] * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
+                if (i != xmin_index and i !=xmax_index+1) and not np.isclose(left[i,j], 0): 
+                    Ex_next[i][j] = Ex_prev[i][j] + dt/left[i,j] * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
+                if (j != ymin_index and j != ymax_index+1) and not np.isclose(bottom[i,j], 0):
+                    Ey_next[i][j] = Ey_prev[i][j] - dt/bottom[i,j] * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
     
     return Ex_next, Ey_next
 
@@ -49,8 +48,8 @@ def magneticFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dt, area, left, rig
     for i in range(Hz_prev.shape[0]):
         for j in range(Hz_prev.shape[1]):
             if np.isclose(area[i,j], 1):
-                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (bottom[i,j]*Ey_prev[i][j+1] - top[i,j]*Ey_prev[i][j] +\
-                                                                right[i,j]*Ex_prev[i  ][j] - left[i,j]*Ex_prev[i+1][j])
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i][j+1] - left[i,j]*Ey_prev[i][j] +\
+                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i+1][j])
 
     return Hz_next 
 
