@@ -10,10 +10,10 @@ def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, bottom, area)
     Ey_next = np.zeros(Ey_prev.shape)
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
-            if not np.isclose(left[i,j], 0):
-                Ex_next[i][j] = Ex_prev[i][j] + dt/left[i,j] * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
             if not np.isclose(bottom[i,j], 0):
-                Ey_next[i][j] = Ey_prev[i][j] - dt/bottom[i,j] * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
+                Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i][j-1])
+            if not np.isclose(left[i,j], 0):
+                Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i-1][j])
     
     return Ex_next, Ey_next
 
@@ -23,8 +23,8 @@ def magneticFieldStep(Ex_prev, Ey_prev, Hz_prev, dt, area, left, right, top, bot
     for i in range(Hz_prev.shape[0]):
         for j in range(Hz_prev.shape[1]):
             if area[i,j] != 0:
-                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (bottom[i,j]*Ey_prev[i][j+1] - top[i,j]*Ey_prev[i][j] +\
-                                                                right[i,j]*Ex_prev[i  ][j] - left[i,j]*Ex_prev[i+1][j])
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i+1][j] - left[i,j]*Ey_prev[i][j] +\
+                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i][j+1])
 
     return Hz_next    
 
@@ -35,10 +35,10 @@ def electricFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, b
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
             if np.isclose(area[i,j], 1):
-                if (i != xmin_index and i !=xmax_index+1) and not np.isclose(left[i,j], 0): 
-                    Ex_next[i][j] = Ex_prev[i][j] + dt/left[i,j] * (Hz_prev[i][j] - Hz_prev[i-1][j  ])
-                if (j != ymin_index and j != ymax_index+1) and not np.isclose(bottom[i,j], 0):
-                    Ey_next[i][j] = Ey_prev[i][j] - dt/bottom[i,j] * (Hz_prev[i][j] - Hz_prev[i  ][j-1])
+                if (j != xmin_index and j !=xmax_index+1) and not np.isclose(bottom[i,j], 0): 
+                    Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i][j-1])
+                if (i != ymin_index and i != ymax_index+1) and not np.isclose(left[i,j], 0):
+                    Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i-1][j])
     
     return Ex_next, Ey_next
 
@@ -48,8 +48,8 @@ def magneticFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dt, area, left, rig
     for i in range(Hz_prev.shape[0]):
         for j in range(Hz_prev.shape[1]):
             if np.isclose(area[i,j], 1):
-                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i][j+1] - left[i,j]*Ey_prev[i][j] +\
-                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i+1][j])
+                Hz_next[i][j] = Hz_prev[i][j] - dt/area[i,j] * (right[i,j]*Ey_prev[i+1][j] - left[i,j]*Ey_prev[i][j] +\
+                                                                bottom[i,j]*Ex_prev[i  ][j] - top[i,j]*Ex_prev[i][j+1])
 
     return Hz_next 
 
@@ -96,6 +96,12 @@ class CFDTD2D():
         xmin, xmax, ymin, ymax = self.mesh.getMinMaxIndexInsideNonConformalCells()
 
         for n in range(nsteps):
+
+            if self.SolverType == "Non Conformal":
+                Hz = magneticFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
+            else:
+                Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
+            
             if self.SolverType == "Non Conformal":
                 Ex, Ey = electricFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area= cell_area,left=cell_lengths_left, bottom=cell_lengths_bottom, xmin_index=xmin, xmax_index=xmax, ymin_index=ymin, ymax_index=ymax)
             else:
@@ -104,13 +110,8 @@ class CFDTD2D():
             Ex[ :][ 0] = 0.0
             Ex[ :][-1] = 0.0
             Ey[ 0][ :] = 0.0
-            Ey[-1][ :] = 0.0  
-
-            if self.SolverType == "Non Conformal":
-                Hz = magneticFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
-            else:
-                Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
-            
+            Ey[-1][ :] = 0.0 
+             
             probeEx[:,:,n] = Ex[:,:]
             probeEy[:,:,n] = Ey[:,:]
             probeHz[:,:,n] = Hz[:,:]
