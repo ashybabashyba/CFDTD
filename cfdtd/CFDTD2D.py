@@ -35,9 +35,9 @@ def electricFieldStepNonConformal(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, b
     for i in range(1, Ex_prev.shape[0]-1):
         for j in range(1, Ex_prev.shape[1]-1):
             if np.isclose(area[i,j], 1):
-                if (j != xmin_index and j !=xmax_index+1) and not np.isclose(bottom[i,j], 0): 
+                if (j != ymin_index and j !=ymax_index+1) and not np.isclose(bottom[i,j], 0): 
                     Ex_next[i][j] = Ex_prev[i][j] + dt/dy * (Hz_prev[i][j] - Hz_prev[i][j-1])
-                if (i != ymin_index and i != ymax_index+1) and not np.isclose(left[i,j], 0):
+                if (i != xmin_index and i != xmax_index+1) and not np.isclose(left[i,j], 0):
                     Ey_next[i][j] = Ey_prev[i][j] - dt/dx * (Hz_prev[i][j] - Hz_prev[i-1][j])
     
     return Ex_next, Ey_next
