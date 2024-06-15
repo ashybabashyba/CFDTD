@@ -20,6 +20,8 @@ class InitialPulse():
             self.Hz = rectangularResonantCavity11(H0=self.Hz, mesh=self.mesh)
         elif self.type == "Non Conformal Rectangular Resonant Cavity 11":
             self.Hz = rectangularResonantCavity11NonConformal(H0=self.Hz, mesh=self.mesh)
+        elif self.type == "ElectricY Gaussian":
+            self.Ey = electricYGaussian(Ey0=self.Ey, mesh=self.mesh, spread=self.spread)
         else:
             raise ValueError('Pulse type not defined')
         return self.Ex, self.Ey, self.Hz
@@ -56,3 +58,11 @@ def rectangularResonantCavity11NonConformal(H0, mesh):
             if (i,j) in insideNonConformalCells:
                 initialH[i,j] = np.cos(4*np.pi*(mesh.gridHx[i] - x0 + mesh.dx/2)/(a-mesh.dx))*np.cos(4*np.pi*(mesh.gridHy[j] - y0 + mesh.dy/2)/(b-mesh.dy))
     return initialH
+
+def electricYGaussian(Ey0, mesh, spread):
+    initialEy = np.zeros(Ey0.shape)
+    centerX = int(mesh.gridEx[-1]/2)
+    centerY = int(mesh.gridEy[-1]/2)
+    for j in range(mesh.gridEy.size):
+        initialEy[centerX, j] = 2*np.exp(- ((mesh.gridEy[j] - centerY)/spread)**2/2)
+    return initialEy
