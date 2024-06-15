@@ -41,3 +41,21 @@ def test_rectangular_resonant_cavity11_NonConformal():
     probeEx, probeEy, probeHz, probeTime = solver.run(nsteps)
 
     solver.plotMagneticFieldAnimation(nsteps)
+
+def test_Ey_Gaussian():
+    node_list = [(5.5,25.5), (95.5,25.5), (95.5, 75.5), (5.5, 75.5)]
+    initial_cell = (50, 50)
+    mesh = Mesh(box_size=100.0, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell=initial_cell)
+    # mesh.plotElectricFieldGrid()
+    pulse = InitialPulse(mesh=mesh, initial_position=initial_cell, spread=1, pulse_type='ElectricY Gaussian')
+    solver = CFDTD2D(mesh, initialPulse=pulse, cfl=0.4)
+    nsteps = int(100 / solver.dt)
+    probeEx, probeEy, probeHz, probeTime = solver.run(nsteps)
+
+    # solver.plotMagneticFieldAnimation(nsteps)
+    # for i in range(nsteps):
+    #     plt.plot(mesh.gridEy, probeEy[int(mesh.gridEx[-1]/2), :, i], '.-', label='Electric Field')
+    #     plt.ylim(-2.1, 2.1)
+    #     plt.grid(which='both')
+    #     plt.pause(0.01)  
+    #     plt.cla()

@@ -63,6 +63,8 @@ def electricYGaussian(Ey0, mesh, spread):
     initialEy = np.zeros(Ey0.shape)
     centerX = int(mesh.gridEx[-1]/2)
     centerY = int(mesh.gridEy[-1]/2)
+    conformalCells, outsideNonConformalCells, insideNonConformalCells = mesh.getCellSeparationByType()
     for j in range(mesh.gridEy.size):
-        initialEy[centerX, j] = 2*np.exp(- ((mesh.gridEy[j] - centerY)/spread)**2/2)
+        if (centerX, j) in insideNonConformalCells:
+            initialEy[centerX, j] = 2*np.exp(- ((mesh.gridEy[j] - centerY)/spread)**2/2)
     return initialEy
