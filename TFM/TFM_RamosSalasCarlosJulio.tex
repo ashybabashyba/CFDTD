@@ -319,7 +319,7 @@ These equations represents a plane wave traveling through the $z$ direction. Tak
 \end{align}
 In these two equations, the time step is represented by the superscripts ($n$) while the argument inside functions represent the spatial step ($k$), so the current time and distance are given by $t = \Delta t \cdot n$ and $z = \Delta x \cdot k$. Finally, we can rearrenge the last equations to obtain the next iterative equations
 \begin{align}
-    E_{x}^{n+1 / 2}(k) &=E_{x}^{n-1 / 2}(k)-\frac{\Delta t}{\varepsilon_{0} \cdot \Delta x}\left[H_{y}^{n}\left(k+\frac{1}{2}\right)-H_{y}^{n}\left(k-\frac{1}{2}\right)\right], \\
+    E_{x}^{n+1 / 2}(k) &=E_{x}^{n-1 / 2}(k)-\frac{\Delta t}{\epsilon_{0} \cdot \Delta x}\left[H_{y}^{n}\left(k+\frac{1}{2}\right)-H_{y}^{n}\left(k-\frac{1}{2}\right)\right], \\
     H_{y}^{n+1}\left(k+\frac{1}{2}\right) &=H_{y}^{n}\left(k+\frac{1}{2}\right)-\frac{\Delta t}{\mu_{0} \cdot \Delta x}\left[E_{x}^{n+1 / 2}(k+1)-E_{x}^{n+1 / 2}(k)\right].
 \end{align}
 It's important to notice that this formulation assume that the electric and magnetic fields are interleaved in both space and time, this is illustrated in the Figure \ref{fig:sullivaninterleaved}.
@@ -329,6 +329,13 @@ It's important to notice that this formulation assume that the electric and magn
     \caption{Interleaving of the electric and magnetic fields in the FDTD formulation. Image taken from \cite{Sullivan2020}.}
     \label{fig:sullivaninterleaved}
 \end{figure}
+\subsection{Boundary conditions}
+
+We have seen that to evolve the field in a node we require the neighboring nodes of the other field, but then, what happens with the electric field in the nodes at the ends of the mesh? These nodes only have one neighbor magnetic field so it is not possible to apply the iterative formula of the FDTD algortihm. In order to compute the electric field at those positions, it is necessary to introduce boundary conditions, for example, the perfect electric conductor boundary condition states that the electric field on these nodes are equals to $0$ causing the electromagnetic wave to "bounce" when interacting with the ends of the mesh; another possible solution is the periodic boundary condition which are characterized as follows
+\begin{equation}
+    E_x^{n+1/2}(0) = E_x^{n-1/2}(0) - \dfrac{\Delta t}{\epsilon 0 \cdot \Delta x}\left[H_{y}^{n}\left(\frac{1}{2}\right)-H_{y}^{n}\left(N-\frac{1}{2}\right)\right],
+\end{equation} 
+where $N$ is the number of cells in the mesh and $E_x(N) = E_x(0)$ for all the time steps.
 
 \section{Two dimensional discrete Maxwell equations}
 
@@ -490,6 +497,16 @@ We can also make a comparison between a FDTD solution with PEC boundary conditio
     \caption{Comparison between conformal and non conformal solutions of the Gaussian electromagnetic wave in different time steps.}
     \label{fig:CFDTD1D_Delay}
 \end{figure}
+
+\section{Two dimensional CFDTD}
+
+Now, unlike the previous case, the CFDTD algorithm in more than one dimension becomes more complicated because there is more freedom in the election of the PEC surface inside the mesh. For this and other reasons, it is necessary to carry out a study on the geometry of the problem before entering the CFDTD-2D algorithm.
+
+\subsection{Mesh geometry}
+
+
+
+
 
 % \chapter{Los enunciados}
 
