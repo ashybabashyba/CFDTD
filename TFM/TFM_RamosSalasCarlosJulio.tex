@@ -15,6 +15,10 @@ sorting=none
 
 \addbibresource{references.bib}
 
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
 % =====================
 % = Datos importantes =
 % =====================
@@ -433,15 +437,59 @@ Let's start with the formalism in one dimension. In this case, it is impossible 
     \label{fig:Mesh1D_CFDTD}
 \end{figure}
 
-In the first group of nodes (the non frontier nodes), for both the electric and magnetic field, we can again use the usual FDTD iterative formula because the distance between neighboring nodes remains equal to $\Delta x$. However, for the neighbor nodes of the PEC sheet, we need to change the iterative equations because the existence of the irregularity, in order to formulate a possible solution, we can consider the PEC sheet position like another node of the electric field mesh adding one degree of freedom to the magnetic and electric field solution (remembering that the solution of the electric field must be equal to zero at all times in this extra node); whit this in mind, we can use a linear interpolation in order to formulate a valid iterative formula, then, if $k_p$ represents the PEC sheet node in the electric field mesh, we have the following equations
+In the first group of nodes (the non frontier nodes), for both the electric and magnetic field, we can again use the usual FDTD iterative formula because the distance between neighboring nodes remains equal to $\Delta x$. However, for the neighbor nodes of the PEC sheet, we need to change the iterative equations because the existence of the irregularity, in order to formulate a possible solution, we can consider the PEC sheet position like another node of the electric field mesh adding one degree of freedom to the magnetic and electric field solution (remembering that the solution of the electric field must be equal to zero at all times in this extra node); with this in mind, we can use a linear interpolation in order to formulate a valid iterative formula, then, if $k_p$ represents the PEC sheet node in the electric field mesh, we have the following equations
 \begin{align}
     H_y^{n+1} \left( k_p - \dfrac{1}{2} \right) &= H_y^{n} \left( k_p - \dfrac{1}{2} \right) + \dfrac{\Delta t}{\mu_0 \Delta x_l}E_x^{n+1/2}(k_p - 1), \\
     H_y^{n+1} \left( k_p + \dfrac{1}{2} \right) &= H_y^{n} \left( k_p + \dfrac{1}{2} \right) - \dfrac{\Delta t}{\mu_0 \Delta x_r}E_x^{n+1/2}(k_p + 1), \\
     E_x^{n+1/2}(k_p - 1) &= E_x^{n-1/2}(k_p - 1) - \dfrac{\Delta t}{\epsilon_0 \Delta x_l} \left[  H_y^{n} \left( k_p + \dfrac{1}{2} \right) -  H_y^{n} \left( k_p - \dfrac{1}{2} \right) \right], \\
     E_x^{n+1/2}(k_p + 1) &= E_x^{n-1/2}(k_p + 1) - \dfrac{\Delta t}{\epsilon_0 \Delta x_r} \left[  H_y^{n} \left( k_p + \dfrac{3}{2} \right) -  H_y^{n} \left( k_p + \dfrac{1}{2} \right) \right].
 \end{align}
-Where $\Delta x_l + \Delta x_r = \Delta x$ represents the existing distance between the PEC sheet node to the left and right node respectively.
+Where $\Delta x_l + \Delta x_r = \Delta x$ represents the existing distance between the PEC sheet node to the left and right node respectively. With these equations already formulated, we can start with the study and validation of our implementation; the electromagnetic wave to study is a Gaussian pulse defined by the initial pulse
+\begin{align}
+    E_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t}{s} \right)^2 \right], \\
+    H_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t - \dfrac{\Delta t}{2} - \dfrac{\Delta x}{2c}}{s} \right)^2 \right],
+\end{align}
+where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current step of the simulation; in order to simplify the algorithm, we also work with natural units ($c=1$). The python script used to recreate the CFDTD algorithm in one dimension and the tests associated can be found in the attached GitHub repository in the files \textit{cfdtd/CFDTD1D.py} and \textit{test/test\_1D.py} respectively. The first result that is expected to be observed is the inestability of the solution with some Courant numbers (the constant $k$ in the equation \ref{eq:CFL}) when the PEC sheet node doesn't match with any other node of the mesh, indeed, we can consider a mesh of length equals to $200$ and spatial step $\Delta x = 1.0$ and a PEC sheet positioned at $150.5$; if the behavior of the CFDTD algorithm were the same as that of the FDTD, we expect the solution of the fields to be stable at all time steps, however, this doesn't happen as we can see in the Figure \ref{fig:CFDTD1D_Inestability}.
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Inestibility1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Inestibility2.png}
+    \end{subfigure}
+    \caption{Propagation of the Gaussian electromagnetic wave with PEC boundary conditions and Courant number equals to $1.0$ in different time steps, on the left in step 65 and on the right in step 80.}
+    \label{fig:CFDTD1D_Inestability}
+\end{figure}
 
+We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located $0.5$ before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved one node. 
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison2.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison3.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison4.png}
+    \end{subfigure}
+    \caption{Compariso between conformal and non conformal solutions of the Gaussian electromagnetic wave in different time steps.}
+    \label{fig:CFDTD1D_Delay}
+\end{figure}
 
 % \chapter{Los enunciados}
 
