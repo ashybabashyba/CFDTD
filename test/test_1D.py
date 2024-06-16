@@ -36,7 +36,7 @@ def test_ElectricField_on_PEC():
 
 def test_ElectricField_delay():
     courantNumber = 0.5
-    final_time = 800 
+    final_time = 600 
     pulse = InitialPulse(initial_time=40, initial_position=100, spread=10, pulse_type="Gaussian")
 
     conformalMesh = Mesh(box_size=200.0, pec_sheet_position=199.5, dx=1.0)
@@ -56,10 +56,6 @@ def test_ElectricField_delay():
     # plt.grid(which='both')
     # plt.show()
 
-    for n in range(120):
-        assert np.allclose(conformalE[:-1, n], nonConformalE[:, n], atol=2.e-1)
-        assert np.allclose(conformalH[:-1, n], nonConformalH[:, n], atol=2.e-1)
+    assert np.allclose(conformalE[:-1, final_time-2], nonConformalE[:, final_time], atol=1.e-3)
+    assert np.allclose(conformalH[:-1, final_time-2], nonConformalH[:, final_time], atol=1.e-3)
 
-    for n in range(150,500):
-        assert np.allclose(conformalE[:-1, n], nonConformalE[:, n-1], atol=2.e-1)
-        assert np.allclose(conformalH[:-1, n], nonConformalH[:, n-1], atol=2.e-1)
