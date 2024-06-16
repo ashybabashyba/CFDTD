@@ -504,6 +504,24 @@ Now, unlike the previous case, the CFDTD algorithm in more than one dimension be
 
 \subsection{Mesh geometry}
 
+Returning to the formulation of the Dey-Mittra algorithm, the difference between the CFDTD and FDTD method lies in the areas and lengths of the cells, so for example, if the curved surface intersects one cell, we need the coordinates of the intersection points to estimate the value of the respective length, for this reason, the coordinates of all existing intersenctions play an important role in the development of the algorithm.
+
+In some of the codes that have been worked around the FDTD method in two dimensions (such as \cite{lmdiazangulo/PyFDTD}), the mesh is obtained through a "\textit{meshgrid}" function \cite{numpy_meshgrid} which takes as argument the two 1D spatial meshes with spatial steps $\Delta x$ and $\Delta y$. If we want to work similar to the one dimension algortihm, it is necessary to add a number of extra nodes corresponding to the intersection points to the mesh, but what happens if we want to add an extra node to the meshgrid? The answer to this can be seen in the Figure \ref{fig:CFDTD2D_Meshgrid} where we can see that adding just one extra node introduces a number of unused nodes equal to the number of points contemplated by the 1D mesh where said node is not located; this causes us to go from $N_x \times N_y$ points to a total of $(N_x + M_x) \times (N_y + M_y)$ increasing the complexity of the system, where $N_x$ and $N_y$ are the number of nodes of the 1D meshes and $M_x + M_y = M$ is the number of intersection points that can belong to one of the two meshes. 
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_Meshgrid1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_Meshgrid2.png}
+    \end{subfigure}
+    \caption{Meshgrid function in python before (left) and after (right) adding as an extra node the point $(5, 5.5)$.}
+    \label{fig:CFDTD2D_Meshgrid}
+\end{figure}
+
 
 
 
