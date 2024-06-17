@@ -419,7 +419,7 @@ where $l_x(i,j)$ and $l_y(i,j)$ represents the length of the edge where is assum
 
 In the uniform rectangular grid case, if there is no curved surface in the mesh, we have $l_x = \Delta x$, $l_y = \Delta y$ and $A = \Delta x \Delta y$ for any pair $i,j$, then, by replacing these values into the equation \ref{eq:FaradayIntegralEquationRectangularGrid}, we can obtain again the magnetic field iterative formula presented in the equation \ref{eq:FDTDMagneticField2D}.
 
-The great adventage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always cero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
+The great adventage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always zero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
 
 \section{Stability in the CFDTD method}
 
@@ -522,8 +522,27 @@ In some of the codes that have been worked around the FDTD method in two dimensi
     \label{fig:CFDTD2D_Meshgrid}
 \end{figure}
 
+In order to avoid this problem, we propose another way of working with the mesh using polygons and the python library "\textit{shapely}", instead of working with all the nodes of the 2D meshgrid with all the intersection points, we characterize the mesh with a total of $(N_x - 1) \times (N_y - 1)$ polygons that represent all the cells contained in the mesh and another polygon used to represent the PEC surface, in this way, it is possible to calculate the lengths and areas of each cell using Boolean operations. 
 
+To simplify the problem worked on, we restrict the PEC surface to be a line or a polygon that separates a maximum of one cell into two cells, the intersection points of a cell must be zero or two depending on wether the intersection between the cell and the PEC polygon is empty or not, an example of the 2D mesh with a PEC polygon or PEC line is presented in the Figure \ref{fig:CFDTD2D_MeshPEC}. With this in mind, if we work with a PEC line we can separate the cells in two groups depending on the number of intersection points: the conformal cells with a number of intersections equal to $2$ and the non conformal cells with empty intersection; in a similar way, for the PEC polygon we can separate the cells in three groups: the conformal cells and the outside or inside non conformal cells, the latter depending on whether they are inside or outside the PEC polygon.
 
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_MeshPECLine.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_MeshPECPolygon.png}
+    \end{subfigure}
+    \caption{Two dimensional mesh (blue dots) considering a PEC line (left) or a PEC polygon (right) represented by the red line, the intersection points are identified as the black triangular marker, the green cross marker represents a reference cell for the initial wave.}
+    \label{fig:CFDTD2D_MeshPEC}
+\end{figure}
+
+Finally, a separation is made so that the mesh knows whether to interpret the lengths or areas depending on whether the wave to be solved is inside or outside the PEC polygon (the option of solving both regions at the same time is excluded). The mesh creation algorithm can be found in the file \textit{mesh/MESH2D.py} and to guarantee its correct functioning, various tests are carried out such as: that the groups in which the cells are separated are mutually exclusive and the sum of its elements is equal to the total number of cells, that the area of non conformal cells are equal to $\Delta x \Delta y$, that the lengths of non conformal cells are equal to $\Delta x$ or $\Delta y$ and that the sum of lengths of the two cells into which a conformal cell is divided also meets the same previous equality, etc; all of these tests can be found in the file \textit{test/test\_Mesh\_2D.py}. 
+
+The great advantage of the constructed algorithm is its ease of being adapted to any curved PEC surface; it is only necessary to introduce as an argument a list of points corresponding to the intersection points of the curve with the mesh for the construction of the PEC polygon. The difference between working with the curved surface and the polygon is that the areas of the cell can be different, however, for a sufficiently dense mesh, this difference is minimal.
 
 
 % \chapter{Los enunciados}
