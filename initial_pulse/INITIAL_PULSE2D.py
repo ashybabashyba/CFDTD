@@ -20,8 +20,8 @@ class InitialPulse():
             self.Hz = rectangularResonantCavity11(H0=self.Hz, mesh=self.mesh)
         elif self.type == "Non Conformal Rectangular Resonant Cavity 11":
             self.Hz = rectangularResonantCavity11NonConformal(H0=self.Hz, mesh=self.mesh)
-        elif self.type == "ElectricY Gaussian":
-            self.Ey = electricYGaussian(Ey0=self.Ey, mesh=self.mesh, spread=self.spread)
+        elif self.type == "MagneticY Gaussian":
+            self.Hz = electricYGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
         else:
             raise ValueError('Pulse type not defined')
         return self.Ex, self.Ey, self.Hz
@@ -59,12 +59,13 @@ def rectangularResonantCavity11NonConformal(H0, mesh):
                 initialH[i,j] = np.cos(4*np.pi*(mesh.gridHx[i] - x0 + mesh.dx/2)/(a-mesh.dx))*np.cos(4*np.pi*(mesh.gridHy[j] - y0 + mesh.dy/2)/(b-mesh.dy))
     return initialH
 
-def electricYGaussian(Ey0, mesh, spread):
-    initialEy = np.zeros(Ey0.shape)
-    centerX = int(mesh.gridEx[-1]/2)
-    centerY = int(mesh.gridEy[-1]/2)
+def electricYGaussian(H0, mesh, center, spread):
+    initialH = np.zeros(H0.shape)
+    centerX = center[0]
+    centerY = center[1]
     conformalCells, outsideNonConformalCells, insideNonConformalCells = mesh.getCellSeparationByType()
-    for j in range(mesh.gridEy.size):
-        if (centerX, j) in insideNonConformalCells:
-            initialEy[centerX, j] = 2*np.exp(- ((mesh.gridEy[j] - centerY)/spread)**2/2)
-    return initialEy
+    for i in range(mesh.gridHx.size):
+        for j in range(mesh.gridHy.size):
+            if (i, j) not in outsideNonConformalCells:
+                initialH[i, j] = math.exp(- ((mesh.gridHx[i]-centerX)**2 ) /math.sqrt(2.0) / spread)
+    return initialH
