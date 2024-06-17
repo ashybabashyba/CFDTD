@@ -145,6 +145,7 @@ class CFDTD2D():
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                     frames=nsteps, interval=50, blit=True)
 
+        plt.colorbar()
         plt.show()
 
     def plotElectricFieldXAnimation(self, nsteps):
@@ -171,6 +172,7 @@ class CFDTD2D():
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                     frames=nsteps, interval=50, blit=True)
 
+        plt.colorbar()
         plt.show()
 
     def plotElectricFieldYAnimation(self, nsteps):
@@ -197,4 +199,5 @@ class CFDTD2D():
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                     frames=nsteps, interval=50, blit=True)
 
+        plt.colorbar()
         plt.show()
