@@ -123,6 +123,8 @@ class CFDTD2D():
     
     def plotMagneticFieldAnimation(self, nsteps):
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
+        paused = [False]
+
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.set_xlim([self.mesh.gridHx[0], self.mesh.gridHx[-1]/self.dx])
@@ -138,18 +140,27 @@ class CFDTD2D():
             return line, timeText
 
         def animate(i):
-            line.set_array(np.transpose(probeHz[:,:,i]))
-            timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
+            if not paused[0]:
+                line.set_array(np.transpose(probeHz[:,:,i]))
+                timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
             return line, timeText
 
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                     frames=nsteps, interval=50, blit=True)
+        
+        def onClick(event):
+            if event.key == 'p':
+                paused[0] = not paused[0]
+
+        fig.canvas.mpl_connect('key_press_event', onClick)
 
         plt.colorbar()
         plt.show()
 
     def plotElectricFieldXAnimation(self, nsteps):
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
+        paused = [False]
+
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
@@ -160,8 +171,9 @@ class CFDTD2D():
         timeText = ax.text(0.02, 0.95, '')
 
         def init():
-            line.set_array(np.transpose(probeEx[:,:,0]))
-            timeText.set_text('')
+            if not paused[0]:
+                line.set_array(np.transpose(probeEx[:,:,0]))
+                timeText.set_text('')
             return line, timeText
 
         def animate(i):
@@ -171,12 +183,20 @@ class CFDTD2D():
 
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                     frames=nsteps, interval=50, blit=True)
+        
+        def onClick(event):
+            if event.key == 'p':
+                paused[0] = not paused[0]
+
+        fig.canvas.mpl_connect('key_press_event', onClick)
 
         plt.colorbar()
         plt.show()
 
     def plotElectricFieldYAnimation(self, nsteps):
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
+        paused = [False]
+
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
@@ -187,8 +207,9 @@ class CFDTD2D():
         timeText = ax.text(0.02, 0.95, '')
 
         def init():
-            line.set_array(np.transpose(probeEy[:,:,0]))
-            timeText.set_text('')
+            if not paused[0]:
+                line.set_array(np.transpose(probeEy[:,:,0]))
+                timeText.set_text('')
             return line, timeText
 
         def animate(i):
@@ -198,6 +219,12 @@ class CFDTD2D():
 
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                     frames=nsteps, interval=50, blit=True)
+        
+        def onClick(event):
+            if event.key == 'p':
+                paused[0] = not paused[0]
+
+        fig.canvas.mpl_connect('key_press_event', onClick)
 
         plt.colorbar()
         plt.show()
