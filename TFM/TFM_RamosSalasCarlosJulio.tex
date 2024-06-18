@@ -465,7 +465,7 @@ where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current 
     \label{fig:CFDTD1D_Inestability}
 \end{figure}
 
-We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located $0.5$ before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved two nodes as can be found in the respective test. 
+We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located $0.5$ before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved two nodes as can be found in the respective test and in the figure \ref{fig:CFDTD1D_DelayNorm}. 
 
 \begin{figure}[h!]
     \centering
@@ -492,6 +492,13 @@ We can also make a comparison between a FDTD solution with PEC boundary conditio
     \label{fig:CFDTD1D_Delay}
 \end{figure}
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.6]{Imagenes/CFDTD1D_DelayNorm.png}
+    \caption{$L_1$ norm difference between non conformal solution and conformal solution two steps before after two bouncings with the PEC sheet.}
+    \label{fig:CFDTD1D_DelayNorm}
+\end{figure}
+\newpage
 \section{Two dimensional CFDTD}
 
 Now, unlike the previous case, the CFDTD algorithm in more than one dimension becomes more complicated because there is more freedom in the election of the PEC surface inside the mesh. For this and other reasons, it is necessary to carry out a study on the geometry of the problem before entering the CFDTD-2D algorithm.
@@ -575,7 +582,7 @@ where $x_0$ is the first coordinate of the reference cell and $s$ is the spread 
     \caption{Evolution of a Gaussian pulse defined by equation \ref{eq:EyInitialCondition} inside a rectangular PEC polygon with CFDTD.}
     \label{fig:CFDTD2D_GaussianEy}
 \end{figure}
-
+\newpage
 Next we want to study the stability of a initial Gaussian magnetic wave defined by 
 \begin{equation}
     H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2 + (y - y_0)^2}{\sqrt{2} s} \right],
@@ -603,6 +610,17 @@ if we work with a mesh similar to the previous one used but now with $\Delta x =
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability4.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability5.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability6.png}
     \end{subfigure}
     \caption{Evolution of a Gaussian 2D magnetic pulse defined by equation \ref{eq:Gaussian2DInitialCondition} inside a rectangular PEC polygon with $\Delta t = \Delta t_{CFL}$ and Courant number equal to $1.0$.}
     \label{fig:CFDTD2D_GaussianStability}
@@ -632,7 +650,7 @@ if we work with a mesh similar to the previous one used but now with $\Delta x =
     \caption{Evolution of a Gaussian 2D magnetic pulse defined by equation \ref{eq:Gaussian2DInitialCondition} inside a rectangular PEC polygon with $\Delta t \neq \Delta t_{CFL}$ and Courant number equal to $1.0$. Instability starts to appear arround $130$ [s].}
     \label{fig:CFDTD2D_GaussianInstability}
 \end{figure}
-
+\newpage
 Finally, we can also study the evolution of a electromagnetic wave inside a rectangular resonant cavity whose initial condition for the TE mode is given by \cite{pozar2012microwave}
 \begin{equation}
     H_z(x, y) = A_{mn}\cos\dfrac{m \pi (x-x_0)}{a} \cos\dfrac{n \pi (y-y_0)}{b},
