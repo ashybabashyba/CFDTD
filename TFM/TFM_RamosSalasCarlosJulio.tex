@@ -6,13 +6,7 @@
 \usepackage[english]{babel}
 %% FONTS: libertine+biolinum+stix
 \usepackage[mono=false]{libertine}
-\usepackage[
-backend=bibtex,
-style=phys,
-citestyle=numeric,
-sorting=none
-]{biblatex}
-
+\usepackage[backend=biber, style=nature, citestyle=numeric, sorting=none]{biblatex}
 \addbibresource{references.bib}
 
 \usepackage{graphicx}
@@ -383,7 +377,7 @@ Using the FDTD method with rectangular grid to analyze objects with curved metal
 
 \section{Introduction to CFDTD}
 
-The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two dimensional PEC using a locally conformal grid \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}. For two dimensional problems we can consider for example a quadrant of the cross section of a circular resonator shown in Figure \ref{fig:DeyMittraMesh}; we can see that the magnetic fields over the cells that don't intersects with the curve can be solved with the regular FDTD method, however, we can't use the same algorithm for the others cells; this is because some neighbour nodes of the electric field discretization are no longer able to interact due to the presence of the PEC surface between them. For this reason, we need to introduce another formulation for the FDTD that can be generalized and used for the CFDTD case.
+The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two dimensional PEC using a locally conformal grid \cite{DeyMittra1997}. For two dimensional problems we can consider for example a quadrant of the cross section of a circular resonator shown in Figure \ref{fig:DeyMittraMesh}; we can see that the magnetic fields over the cells that don't intersects with the curve can be solved with the regular FDTD method, however, we can't use the same algorithm for the others cells; this is because some neighbour nodes of the electric field discretization are no longer able to interact due to the presence of the PEC surface between them. For this reason, we need to introduce another formulation for the FDTD that can be generalized and used for the CFDTD case.
 
 \begin{figure}[h]
     \centering
@@ -419,7 +413,7 @@ where $l_x(i,j)$ and $l_y(i,j)$ represents the length of the edge where is assum
 
 In the uniform rectangular grid case, if there is no curved surface in the mesh, we have $l_x = \Delta x$, $l_y = \Delta y$ and $A = \Delta x \Delta y$ for any pair $i,j$, then, by replacing these values into the equation \ref{eq:FaradayIntegralEquationRectangularGrid}, we can obtain again the magnetic field iterative formula presented in the equation \ref{eq:FDTDMagneticField2D}.
 
-The great advantage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always zero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
+The great advantage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always zero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{DeyMittra1997}.
 
 \section{Stability in the CFDTD method}
 
@@ -506,7 +500,7 @@ Now, unlike the previous case, the CFDTD algorithm in more than one dimension be
 
 Returning to the formulation of the Dey-Mittra algorithm, the difference between the CFDTD and FDTD method lies in the areas and lengths of the cells, so for example, if the curved surface intersects one cell, we need the coordinates of the intersection points to estimate the value of the respective length, for this reason, the coordinates of all existing intersenctions play an important role in the development of the algorithm.
 
-In some of the codes that have been worked around the FDTD method in two dimensions (such as \cite{lmdiazangulo/PyFDTD}), the mesh is obtained through a "\textit{meshgrid}" function \cite{numpy_meshgrid} which takes as argument the two 1D spatial meshes with spatial steps $\Delta x$ and $\Delta y$. If we want to work similar to the one dimension algortihm, it is necessary to add a number of extra nodes corresponding to the intersection points to the mesh, but what happens if we want to add an extra node to the meshgrid? The answer to this can be seen in the Figure \ref{fig:CFDTD2D_Meshgrid} where we can see that adding just one extra node introduces a number of unused nodes equal to the number of points contemplated by the 1D mesh where said node is not located; this causes us to go from $N_x \times N_y$ points to a total of $(N_x + M_x) \times (N_y + M_y)$ increasing the complexity of the system, where $N_x$ and $N_y$ are the number of nodes of the 1D meshes and $M_x + M_y = M$ is the number of intersection points that can belong to one of the two meshes. 
+In some of the codes that have been worked around the FDTD method in two dimensions (such as \cite{Angulo_PyDG1D_2024}), the mesh is obtained through a "\textit{meshgrid}" function \cite{harris2020array} which takes as argument the two 1D spatial meshes with spatial steps $\Delta x$ and $\Delta y$. If we want to work similar to the one dimension algortihm, it is necessary to add a number of extra nodes corresponding to the intersection points to the mesh, but what happens if we want to add an extra node to the meshgrid? The answer to this can be seen in the Figure \ref{fig:CFDTD2D_Meshgrid} where we can see that adding just one extra node introduces a number of unused nodes equal to the number of points contemplated by the 1D mesh where said node is not located; this causes us to go from $N_x \times N_y$ points to a total of $(N_x + M_x) \times (N_y + M_y)$ increasing the complexity of the system, where $N_x$ and $N_y$ are the number of nodes of the 1D meshes and $M_x + M_y = M$ is the number of intersection points that can belong to one of the two meshes. 
 
 \begin{figure}[h!]
     \centering
