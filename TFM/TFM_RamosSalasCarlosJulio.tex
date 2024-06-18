@@ -396,30 +396,30 @@ The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two
 
 Let's consider a two dimensional rectangular grid discretization same as the FDTD case. Now, let's consider the Faraday equation in the integral form for the free space given by
 \begin{equation}
-    \oint_{\partial S} \boldsymbol{E} \cdot d \vec{l} = -\dfrac{d}{dt} \int_{S} \mu_0 \boldsymbol{H} \cdot d\vec{s}.
+    \oint_{\partial S} \boldsymbol{E} \cdot d \boldsymbol{l} = -\dfrac{d}{dt} \int_{S} \mu_0 \boldsymbol{H} \cdot d\boldsymbol{s}.
     \label{eq:FaradayIntegralEquation}
 \end{equation}
 If we assume that the electric fields are constant along the edges between the nodes, that the magnetics fields are also constant in the worked cell and if we are working on the TE mode, we can obtain from the equation \ref{eq:FaradayIntegralEquation} the following relation
 \begin{equation}
 \begin{aligned}
-    -\mu_0*A(i,j)\dfrac{\partial}{\partial t} H_z\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= E_x(i,j)*l_x(i,j) - E_x(i,j+1)*l_x(i,j+1) \\
-                                                                                                   &+ E_y(i+1,j)*l_y(i+1,j) - E_y(i,j)*l_y(i,j),  
+    -\mu_0 \cdot A(i,j)\dfrac{\partial}{\partial t} H_z\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= E_x(i,j)\cdot l_x(i,j) - E_x(i,j+1) \cdot l_x(i,j+1) \\
+                                                                                                   &+ E_y(i+1,j)\cdot l_y(i+1,j) - E_y(i,j)\cdot l_y(i,j),  
 \end{aligned}
 \label{eq:FaradayIntegralEquationRectangularGrid}
 \end{equation}
 where $l_x(i,j)$ and $l_y(i,j)$ represents the length of the edge where is assumed the electric node $E_x(i,j)$ and $E_y(i,j)$ respectively, and $A(i,j)$ the area where the magnetic field $H_z (i + 1/2, j + 1/2)$ is placed. We also assumed that the area is constant in the time so it can separated from the time derivative. Finally we take the central difference aproximation for the time derivative and rearranging we obtain
 \begin{equation}
     \begin{aligned}
-        H_z^{n + 1}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= H_z^{n}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) - \dfrac{\Delta t}{\mu_0 * A(i,j)} \times \\
-                                                                       &\times \big[ E^{n + 1/2}_x(i,j)*l_x(i,j)- E^{n + 1/2}_x(i,j+1)*l_x(i,j+1)  \\
-                                                                       &+  E^{n + 1/2}_y(i+1,j)*l_y(i+1,j) - E^{n + 1/2}_y(i,j)*l_y(i,j)\big].  
+        H_z^{n + 1}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= H_z^{n}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right)  \\
+        - \dfrac{\Delta t}{\mu_0 \cdot A(i,j)} & \big[ E^{n + 1/2}_x(i,j)\cdot l_x(i,j)- E^{n + 1/2}_x(i,j+1)\cdot l_x(i,j+1)  \\
+                                                                       &+  E^{n + 1/2}_y(i+1,j)\cdot l_y(i+1,j) - E^{n + 1/2}_y(i,j)\cdot l_y(i,j)\big].  
     \end{aligned}
 \label{eq:FaradayIntegralEquationRectangularGrid}
 \end{equation}
 
 In the uniform rectangular grid case, if there is no curved surface in the mesh, we have $l_x = \Delta x$, $l_y = \Delta y$ and $A = \Delta x \Delta y$ for any pair $i,j$, then, by replacing these values into the equation \ref{eq:FaradayIntegralEquationRectangularGrid}, we can obtain again the magnetic field iterative formula presented in the equation \ref{eq:FDTDMagneticField2D}.
 
-The great adventage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always zero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
+The great advantage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always zero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{https://doi.org/10.1002/(SICI)1098-2760(199703)14:4<213::AID-MOP6>3.0.CO;2-M}.
 
 \section{Stability in the CFDTD method}
 
@@ -456,7 +456,7 @@ Where $\Delta x_l + \Delta x_r = \Delta x$ represents the existing distance betw
     E_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t}{s} \right)^2 \right], \\
     H_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t - \dfrac{\Delta t}{2} - \dfrac{\Delta x}{2c}}{s} \right)^2 \right],
 \end{align}
-where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current step of the simulation; in order to simplify the algorithm, we also work with natural units ($c=1$). The python script used to recreate the CFDTD algorithm in one dimension and the tests associated can be found in the attached GitHub repository in the files \textit{cfdtd/CFDTD1D.py} and \textit{test/test\_1D.py} respectively. The first result that is expected to be observed is the inestability of the solution with some Courant numbers (the constant $k$ in the equation \ref{eq:CFL}) when the PEC sheet node doesn't match with any other node of the mesh, indeed, we can consider a mesh of length equals to $200$ and spatial step $\Delta x = 1.0$ and a PEC sheet positioned at $150.5$; if the behavior of the CFDTD algorithm were the same as that of the FDTD, we expect the solution of the fields to be stable at all time steps, however, this doesn't happen as we can see in the Figure \ref{fig:CFDTD1D_Inestability}.
+where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current step of the simulation; in order to simplify the algorithm, we also work with natural units ($c=1$). The python script used to recreate the CFDTD algorithm in one dimension and the tests associated can be found in the attached GitHub repository in the files \textit{cfdtd/CFDTD1D.py} and \textit{test/test\_1D.py} respectively. The first result that is expected to be observed is the instability of the solution with some Courant numbers (the constant $k$ in the equation \ref{eq:CFL}) when the PEC sheet node doesn't match with any other node of the mesh, indeed, we can consider a mesh of length equals to $200$ and spatial step $\Delta x = 1.0$ and a PEC sheet positioned at $150.5$; if the behavior of the CFDTD algorithm were the same as that of the FDTD, we expect the solution of the fields to be stable at all time steps, however, this doesn't happen as we can see in the Figure \ref{fig:CFDTD1D_Inestability}.
 \begin{figure}[h!]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
@@ -544,6 +544,100 @@ Finally, a separation is made so that the mesh knows whether to interpret the le
 
 The great advantage of the constructed algorithm is its ease of being adapted to any curved PEC surface; it is only necessary to introduce as an argument a list of points corresponding to the intersection points of the curve with the mesh for the construction of the PEC polygon. The difference between working with the curved surface and the polygon is that the areas of the cell can be different, however, for a sufficiently dense mesh, this difference is minimal.
 
+\subsection{Two dimensional algorithm}
+
+Once the mesh is built, adapting it to the Dey-Mittra algorithm is relatively easy, it is only necessary to pass the mesh as an argument and when performing the time steps of the electromagnetic fields, call the area and length calculation routine defined in the mesh script for the worked cell. 
+
+For the validation of the method, we consider three different possible initial pulses for the electromagnetic wave, these being the two dimensional Gaussian, the Gaussian restricted to one dimension and the resonant rectangular cavity in the mode $44$; all of these can be found in the python script "\textit{initial\_pulse/INITIAL\_PULSE2D.py}", this class needs as arguments the spread of the wave, the mesh worked, the same reference cell mentioned in the previous subsection and the type of the pulse to work. Once we have defined our mesh and initial pulse, we can start our solver which needs as arguments the two previously mentioned classes and the Courant number. The solver class can be found in the file "\textit{cfdtd/CFDTD2D.py}".
+
+We begin our validation, seeing at the solution obtained from a Gaussian magnetic wave that depends only on the $x$ coordinate as follows
+\begin{equation}
+    H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2}{\sqrt{2} s} \right],
+\label{eq:EyInitialCondition}
+\end{equation}
+where $x_0$ is the first coordinate of the reference cell and $s$ is the spread of the wave. We work with a square mesh of dimensions $100 \times 100$ and spatial steps $\Delta x = \Delta y = 2.0$, inside this mesh we put a rectangular PEC polygon defined by the nodes $(5.5,40.5)$, $(94.5,40.5)$, $(94.5, 60.5)$ and $(5.5, 60.5)$ and we take $(50, 50)$ as the reference cell; then, we put the initial condition defined in equation \ref{eq:EyInitialCondition} inside the PEC polygon and start the solver with a Courant number equals to $0.4$. With these parameters, we expect the evolution of the wave to have a similar behavior as if it were in one dimension, i.e., it only propagates in one direction. The result of our simulation is represented in figure \ref{fig:CFDTD2D_GaussianEy} where the expected behavior is confirmed.
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY2.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY3.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY4.png}
+    \end{subfigure}
+    \caption{Evolution of a Gaussian pulse defined by equation \ref{eq:EyInitialCondition} inside a rectangular PEC polygon with CFDTD.}
+    \label{fig:CFDTD2D_GaussianEy}
+\end{figure}
+
+Next we want to study the stability of a initial Gaussian magnetic wave defined by 
+\begin{equation}
+    H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2 + (y - y_0)^2}{\sqrt{2} s} \right],
+\label{eq:Gaussian2DInitialCondition}
+\end{equation}
+if we work with a mesh similar to the previous one used but now with $\Delta x = \Delta y = 1.0$, and a rectangular PEC polygon defined by the nodes $(25.5,10.5)$, $(75.5,10.5)$, $(75.5, 95.5)$ and $(25.5, 95.5)$. In this case, we have two tipes of conformal cells, the cells that have $A^{ratio} = 1/4$ and $\max({l^{ratio}}) = 1/2$ (the corner conformal cells); and the cells that have $A^{ratio} = 1/2$ and $\max({l^{ratio}}) = 1$, following the equation \ref{eq:StabilityAngulo}, we observe in both cases that $\Delta t = \Delta t_{CFL}$, so we expect not to observe any instability for any Courant number less or equal to $1$ as seen in the Figure \ref{fig:CFDTD2D_GaussianStability}. On the other hand, if we replace $10.5$ with $10.6$ and $95.5$ with $95.4$ in the nodes of the PEC polygon, we obtain $A^{ratio} = 1/5$ and $\max({l^{ratio}}) = 1/2$ for the corner conformal cells, then, for this cells we have $\Delta t \neq \Delta t_{CFL}$ and we expect to have numerical instability for Courant Number Equal to 1 as shown in Figure \ref{fig:CFDTD2D_GaussianInstability}.
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability2.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability3.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability4.png}
+    \end{subfigure}
+    \caption{Evolution of a Gaussian 2D magnetic pulse defined by equation \ref{eq:Gaussian2DInitialCondition} inside a rectangular PEC polygon with CFDTD with $\Delta t = \Delta t_{CFL}$ and Courant number equal to $1.0$.}
+    \label{fig:CFDTD2D_GaussianStability}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability2.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability3.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability4.png}
+    \end{subfigure}
+    \caption{Evolution of a Gaussian 2D magnetic pulse defined by equation \ref{eq:Gaussian2DInitialCondition} inside a rectangular PEC polygon with CFDTD with $\Delta t \neq \Delta t_{CFL}$ and Courant number equal to $1.0$. Instability starts to appear arround $130$ [s].}
+    \label{fig:CFDTD2D_GaussianInstability}
+\end{figure}
 
 % \chapter{Los enunciados}
 
