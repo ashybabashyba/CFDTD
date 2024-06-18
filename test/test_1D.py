@@ -56,6 +56,14 @@ def test_ElectricField_delay():
     # plt.grid(which='both')
     # plt.show()
 
-    assert np.allclose(conformalE[:-1, final_time-2], nonConformalE[:, final_time], atol=1.e-3)
-    assert np.allclose(conformalH[:-1, final_time-2], nonConformalH[:, final_time], atol=1.e-3)
+    # plt.figure(figsize=(8, 6))
+    # error_norm1 = np.abs(conformalE[:-1, final_time-2] - nonConformalE[:, final_time])
+    # plt.scatter(range(len(error_norm1)), error_norm1, marker='o', color='b')
+    # plt.title('$L_1$ norm difference between non conformal solution and conformal solution \n two steps before after two bouncings')
+    # plt.ylim(-0.02, 0.02)
+    # plt.grid(True)
+    # plt.show()
+
+    assert np.allclose(conformalE[:-1, final_time-2], nonConformalE[:, final_time], atol=5.e-4)
+    assert np.allclose(conformalH[:-1, final_time-2], nonConformalH[:, final_time], atol=5.e-4)
 
