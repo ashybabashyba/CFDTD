@@ -673,6 +673,13 @@ where $a$ and $b$ are the lengths of the rectangular box, $(x_0, y_0)$ is the lo
 \end{figure}
 
 
+\chapter{Conclusions}
+
+In this work, a review and implementation of conformal finite differences in the time domain in both one and two dimensions was carried out, proposing for the first case an iterative formula based on an interpolation. It is verified that the conformal solution of a Gaussian presents a delay with respect to the non conformal solution when the PEC sheet is 0.5 units before the end of the mesh, finding in particular that after two bounces, the conformal wave is practically equal to the non conformal solution but with a two time steps difference.
+
+For the two-dimensional case, a Python class was built for meshing where instead of interpreting the grid by nodes, it is interpreted through polygons in order to reduce the complexity of the problem for problems with large geometries. In order to guarantee the correct operation of the routines of this class, several tests were developed to check and verify the proper behavior in particular cases.
+
+The Dey-Mittra algorithm was implemented in order to adapt the two dimensional solver to solve problems requiring CFDTD, the evolution of a "1.5 "D Gaussian pulse was studied to observe behaviors similar to the evolution of a 1D Gaussian wave. The stability behavior according to the PEC polygon using a 2D Gaussian wave was observed, seeing that in the case where the conformal cells are divided into two groups characterized by $A^{ratio} = 1/4$ and $\max({l^{ratio}}) = 1/2$ and $A^{ratio} = 1/2$ and $\max({l^{ratio}}) = 1$, the FDTD stability condition is recovered. Finally, the evolution of a wave inside a rectangular resonant cavity is studied, observing for the TE mode the expected periodicity effects for all fields. 
 
 
 % \chapter{Los enunciados}
