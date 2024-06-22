@@ -7,9 +7,41 @@ from cfdtd.CFDTD1D import *
 
 def test_visual_pec_pulse():
     mesh = Mesh(box_size=200.0, pec_sheet_position=150.5, dx=1.0)
-    pulse = InitialPulse(initial_time=40, initial_position=100, spread=10, pulse_type="Gaussian")
-    solver = CFDTD1D(mesh, pulse, boundary_type="pec", cfl=0.79)
+    pulse = InitialPulse(initial_time=40, initial_position=80, spread=10, pulse_type="Gaussian")
+    solver = CFDTD1D(mesh, pulse, boundary_type="pec", cfl=1.0)
     probeE, probeH = solver.run(600)
+
+    # plt.hlines(1,0,20)  
+    # plt.xlim(0,21)
+    # plt.ylim(0.5,1.5)
+
+    # y = np.ones(np.shape(mesh.xE))   
+    # plt.plot(mesh.xE,y,'|', ms=20)
+    # plt.scatter(mesh.getPECSheetPosition(), 1, color='red', s=500, zorder=10, marker='|')
+
+    # node1_x = mesh.xE[mesh.getPECIndexPosition()-1]  
+    # node2_x = mesh.getPECSheetPosition()  
+    # node3_x = mesh.xE[mesh.getPECIndexPosition()+1]
+    # delta_y = 1.0  
+
+    # plt.annotate(
+    #     '$\Delta x_l$',
+    #     xy=((node1_x + node2_x) / 2, delta_y),
+    #     xytext=((node1_x + node2_x) / 2, delta_y + 0.1),
+    #     arrowprops=dict(arrowstyle='->', lw=.5),
+    #     ha='center'
+    # )
+
+    # plt.annotate(
+    #     '$\Delta x_r$',
+    #     xy=((node3_x + node2_x) / 2, delta_y),
+    #     xytext=((node3_x + node2_x) / 2, delta_y - 0.1),
+    #     arrowprops=dict(arrowstyle='->', lw=.5),
+    #     ha='center'
+    # )
+    # plt.title('Example of an electric field mesh')
+    # plt.axis('off')
+    # plt.show()
 
     for n in range(probeE.shape[1]):
         if n % 5 == 0:  # Skipping rate 
@@ -18,7 +50,9 @@ def test_visual_pec_pulse():
             plt.axvline(x=mesh.getPECSheetPosition(), color='r', linestyle='--', label='PEC sheet position')
             plt.legend()
             plt.ylim(-2.1, 2.1)
-            plt.title(n*solver.dt)
+            plt.xlabel('FDTD cells')
+            plt.ylabel('$E_x$ [V/m]')
+            plt.title(f'Time: {n*solver.dt} [ns]')
             plt.grid(which='both')
             plt.pause(0.01)  
             plt.cla()
@@ -53,6 +87,9 @@ def test_ElectricField_delay():
     # plt.axvline(x=nonConformalMesh.getPECSheetPosition(), color='r', linestyle='--', label='PEC sheet position')
     # plt.legend()
     # plt.ylim(-2.1, 2.1)
+    # plt.title(f'Time: {final_time*conformalSolver.dt} [ns]')
+    # plt.xlabel('FDTD cells')
+    # plt.ylabel('$E_x$ [V/m]')
     # plt.grid(which='both')
     # plt.show()
 
@@ -61,6 +98,8 @@ def test_ElectricField_delay():
     # plt.scatter(range(len(error_norm1)), error_norm1, marker='o', color='b')
     # plt.title('$L_1$ norm difference between non conformal solution and conformal solution \n two steps before after two bouncings')
     # plt.ylim(-0.02, 0.02)
+    # plt.xlabel('FDTD cells')
+    # plt.ylabel('$E_x$ [V/m]')
     # plt.grid(True)
     # plt.show()
 
