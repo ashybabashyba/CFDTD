@@ -334,7 +334,8 @@ We have seen that to evolve the field in a node we require the neighboring nodes
 \begin{equation}
     E_x^{n+1/2}(0) = E_x^{n-1/2}(0) - \dfrac{\Delta t}{\epsilon 0 \cdot \Delta x}\left[H_{y}^{n}\left(\frac{1}{2}\right)-H_{y}^{n}\left(N-\frac{1}{2}\right)\right],
 \end{equation} 
-where $N$ is the number of cells in the mesh and $E_x(N) = E_x(0)$ for all the time steps.
+where $N$ is the number of cells in the mesh and $E_x(N) = E_x(0)$ for all the time steps. Another example of boundary conditions is the Mur absorption condition, which allows to nullify the fields arriving at the boundary so that there are no bounces, similarly, there is also the Perfectly Matched Layer (PML) condition, which is also an absorption condition used in scattering problems in order to make it easier to distinguish between the incident wave and the one reflected by the material.
+
 
 \section{Two-dimensional discrete Maxwell equations}
 
