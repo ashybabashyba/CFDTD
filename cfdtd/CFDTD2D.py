@@ -129,6 +129,7 @@ class CFDTD2D():
         ax = fig.add_subplot(1, 1, 1)
         ax.set_xlim([self.mesh.gridHx[0], self.mesh.gridHx[-1]/self.dx])
         ax.set_ylim([self.mesh.gridHy[0], self.mesh.gridHy[-1]/self.dy])
+        ax.set_title('Magnetic field $H_z$')
         ax.set_xlabel('X coordinate [m]')
         ax.set_ylabel('Y coordinate [m]')
         line = plt.imshow(np.transpose(probeHz[:,:,0]), animated=True, vmin=-0.5, vmax=0.5)
@@ -142,7 +143,7 @@ class CFDTD2D():
         def animate(i):
             if not paused[0]:
                 line.set_array(np.transpose(probeHz[:,:,i]))
-                timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
+                timeText.set_text('Time = %2.1f [ns]' % (probeTime[i]))
             return line, timeText
 
         anim = animation.FuncAnimation(fig, animate, init_func=init,
@@ -165,6 +166,7 @@ class CFDTD2D():
         ax = fig.add_subplot(1, 1, 1)
         ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
         ax.set_ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
+        ax.set_title('Electric field $E_x$')
         ax.set_xlabel('X coordinate [m]')
         ax.set_ylabel('Y coordinate [m]')
         line = plt.imshow(np.transpose(probeEx[:,:,0]), animated=True, vmin=-0.5, vmax=0.5)
@@ -178,7 +180,7 @@ class CFDTD2D():
 
         def animate(i):
             line.set_array(np.transpose(probeEx[:,:,i]))
-            timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
+            timeText.set_text('Time = %2.1f [ns]' % (probeTime[i]))
             return line, timeText
 
         anim = animation.FuncAnimation(fig, animate, init_func=init,
@@ -201,6 +203,7 @@ class CFDTD2D():
         ax = fig.add_subplot(1, 1, 1)
         ax.set_xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
         ax.set_ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
+        ax.set_title('Electric field $E_y$')
         ax.set_xlabel('X coordinate [m]')
         ax.set_ylabel('Y coordinate [m]')
         line = plt.imshow(np.transpose(probeEy[:,:,0]), animated=True, vmin=-0.5, vmax=0.5)
@@ -214,7 +217,7 @@ class CFDTD2D():
 
         def animate(i):
             line.set_array(np.transpose(probeEy[:,:,i]))
-            timeText.set_text('Time = %2.1f [s]' % (probeTime[i]))
+            timeText.set_text('Time = %2.1f [ns]' % (probeTime[i]))
             return line, timeText
 
         anim = animation.FuncAnimation(fig, animate, init_func=init,
@@ -227,4 +230,37 @@ class CFDTD2D():
         fig.canvas.mpl_connect('key_press_event', onClick)
 
         plt.colorbar()
+        plt.show()
+
+    def plotMagneticFieldFrame(self, frame):
+        nsteps = int(frame/self.dt)
+        probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
+
+        plt.imshow(np.transpose(probeHz[:, :, nsteps]), cmap='viridis', aspect='auto')
+        plt.colorbar()
+        plt.title(f'Magnetic field $H_z$ at {probeTime[nsteps]:.2f} ns')
+        plt.xlabel('X coordinate [m]')
+        plt.ylabel('Y coordinate [m]')
+        plt.show()
+
+    def plotElectricFieldXFrame(self, frame):
+        nsteps = int(frame/self.dt)
+        probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
+
+        plt.imshow(np.transpose(probeEx[:, :, nsteps]), cmap='viridis', aspect='auto')
+        plt.colorbar()
+        plt.title(f'Electric field $E_x$ at {probeTime[nsteps]:.2f} ns')
+        plt.xlabel('X coordinate [m]')
+        plt.ylabel('Y coordinate [m]')
+        plt.show()
+
+    def plotElectricFieldYFrame(self, frame):
+        nsteps = int(frame/self.dt)
+        probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
+
+        plt.imshow(np.transpose(probeEy[:, :, nsteps]), cmap='viridis', aspect='auto')
+        plt.colorbar()
+        plt.title(f'Electric field $E_y$ at {probeTime[nsteps]:.2f} ns')
+        plt.xlabel('X coordinate [m]')
+        plt.ylabel('Y coordinate [m]')
         plt.show()
