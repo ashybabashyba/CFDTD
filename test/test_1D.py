@@ -44,13 +44,13 @@ def test_visual_pec_pulse():
     # plt.show()
 
     for n in range(probeE.shape[1]):
-        if n % 5 == 0:  # Skipping rate 
+        if n % 1 == 0:  # Skipping rate 
             plt.plot(mesh.xE, probeE[:,n], '.-', label='Electric Field')
             #plt.plot(mesh.xH, probeH[:,n], '.-', label='Magnetic Field')
             plt.axvline(x=mesh.getPECSheetPosition(), color='r', linestyle='--', label='PEC sheet position')
             plt.legend()
             plt.ylim(-2.1, 2.1)
-            plt.xlabel('FDTD cells')
+            plt.xlabel('x position [m]')
             plt.ylabel('$E_x$ [V/m]')
             plt.title(f'Time: {n*solver.dt} [ns]')
             plt.grid(which='both')
@@ -88,7 +88,7 @@ def test_ElectricField_delay():
     # plt.legend()
     # plt.ylim(-2.1, 2.1)
     # plt.title(f'Time: {final_time*conformalSolver.dt} [ns]')
-    # plt.xlabel('FDTD cells')
+    # plt.xlabel('x position [m]')
     # plt.ylabel('$E_x$ [V/m]')
     # plt.grid(which='both')
     # plt.show()
@@ -98,7 +98,7 @@ def test_ElectricField_delay():
     # plt.scatter(range(len(error_norm1)), error_norm1, marker='o', color='b')
     # plt.title('$L_1$ norm difference between non conformal solution and conformal solution \n two steps before after two bouncings')
     # plt.ylim(-0.02, 0.02)
-    # plt.xlabel('FDTD cells')
+    # plt.xlabel('x position [m]')
     # plt.ylabel('$E_x$ [V/m]')
     # plt.grid(True)
     # plt.show()
