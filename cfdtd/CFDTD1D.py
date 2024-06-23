@@ -66,7 +66,7 @@ class CFDTD1D():
 
         self.kp = self.mesh.getPECSheetPosition()
         self.ke = self.mesh.getLength()
-        self.kc = int(self.pulse.initialPosition)
+        self.kc = int(self.pulse.initialPosition/self.mesh.dx)
 
         self.dx = self.mesh.dx
         self.dt = self.dx * self.cfl
