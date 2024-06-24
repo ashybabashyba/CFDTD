@@ -49,7 +49,7 @@ def rectangularResonantCavity(H0, mesh, m, n):
                 initialH[i,j] = np.cos(m*np.pi*(mesh.gridHx[i] - x0)/a)*np.cos(n*np.pi*(mesh.gridHy[j] - y0)/b)
     return initialH
 
-def rectangularResonantCavityNonConformal(H0, mesh):
+def rectangularResonantCavityNonConformal(H0, mesh, m, n):
     initialH = np.zeros(H0.shape)
     conformalCells, outsideNonConformalCells, insideNonConformalCells = mesh.getCellSeparationByType()
     a = np.abs(mesh.nodesList[0][0] - mesh.nodesList[1][0])
