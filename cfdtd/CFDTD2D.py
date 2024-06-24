@@ -121,6 +121,15 @@ class CFDTD2D():
 
         return probeEx, probeEy, probeHz, probeTime
     
+    def getPeriod(self, field, time_vector):
+        period = None
+
+        for i in range(1, len(time_vector)):
+            if np.allclose(field[:, :, i], field[:, :, 0], atol=1.e-03):
+                period = time_vector[i]
+                break
+        return period
+    
     def plotMagneticFieldAnimation(self, nsteps):
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps)
         paused = [False]
@@ -236,31 +245,37 @@ class CFDTD2D():
         nsteps = int(frame/self.dt)
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
 
-        plt.imshow(np.transpose(probeHz[:, :, nsteps]), cmap='viridis', aspect='auto')
+        plt.imshow(np.transpose(probeHz[:, :, nsteps]), animated=True, vmin=-0.5, vmax=0.5)
         plt.colorbar()
         plt.title(f'Magnetic field $H_z$ at {probeTime[nsteps]:.2f} ns')
         plt.xlabel('X coordinate [m]')
         plt.ylabel('Y coordinate [m]')
+        plt.xlim([self.mesh.gridHx[0], self.mesh.gridHx[-1]/self.dx])
+        plt.ylim([self.mesh.gridHy[0], self.mesh.gridHy[-1]/self.dy])
         plt.show()
 
     def plotElectricFieldXFrame(self, frame):
         nsteps = int(frame/self.dt)
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
 
-        plt.imshow(np.transpose(probeEx[:, :, nsteps]), cmap='viridis', aspect='auto')
+        plt.imshow(np.transpose(probeEx[:, :, nsteps]), animated=True, vmin=-0.5, vmax=0.5)
         plt.colorbar()
         plt.title(f'Electric field $E_x$ at {probeTime[nsteps]:.2f} ns')
         plt.xlabel('X coordinate [m]')
         plt.ylabel('Y coordinate [m]')
+        plt.xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
+        plt.ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
         plt.show()
 
     def plotElectricFieldYFrame(self, frame):
         nsteps = int(frame/self.dt)
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
 
-        plt.imshow(np.transpose(probeEy[:, :, nsteps]), cmap='viridis', aspect='auto')
+        plt.imshow(np.transpose(probeEy[:, :, nsteps]), animated=True, vmin=-0.5, vmax=0.5)
         plt.colorbar()
         plt.title(f'Electric field $E_y$ at {probeTime[nsteps]:.2f} ns')
         plt.xlabel('X coordinate [m]')
         plt.ylabel('Y coordinate [m]')
+        plt.xlim([self.mesh.gridEx[0], self.mesh.gridEx[-1]/self.dx])
+        plt.ylim([self.mesh.gridEy[0], self.mesh.gridEy[-1]/self.dy])
         plt.show()
