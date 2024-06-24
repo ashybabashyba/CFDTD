@@ -662,7 +662,11 @@ Finally, we can also study the evolution of a electromagnetic wave inside a rect
     H_z(x, y) = A_{mn}\cos\dfrac{m \pi (x-x_0)}{a} \cos\dfrac{n \pi (y-y_0)}{b},
 \label{eq:ResonantRectangularCavity}
 \end{equation}
-where $a$ and $b$ are the lengths of the rectangular box, $(x_0, y_0)$ is the lower left coordinate of the box, $m, n$ are positive integers and $A_{mn}$ is the amplitude of the wave. For the simulation, we again construct a mesh equal to the case of the 2D Gaussian, and a rectangular PEC polygon defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$, we again define the initial wave inside the PEC polygon. In particular, the wave we simulate is the mode $m = n = 4$, we expect to observe a resonance and periodic behavior in all the electromagnetic fields, and in fact, it is shown in the Figure \ref{fig:CFDTD2D_RectangularResonantCavity}.
+where $a$ and $b$ are the lengths of the rectangular box, $(x_0, y_0)$ is the lower left coordinate of the box, $m, n$ are positive integers and $A_{mn}$ is the amplitude of the wave. For the simulation, we again construct a mesh equal to the case of the 2D Gaussian, and a rectangular PEC polygon defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$, we again define the initial wave inside the PEC polygon. In particular, the wave we simulate is the mode $m = n = 4$, we expect to observe a resonance and periodic behavior in all the electromagnetic fields, and in fact, it is shown in the Figures \ref{fig:CFDTD2D_RectangularResonantCavity} and \ref{fig:CFDTD2D_RectangularResonantCavity_NodeEvolution}. In addition, the period of oscillation of the electromagnetic wave can be calculated through a routine and this can be compared to the theoretical period which is obtained as the inverse of the resonant frequency given by \cite{pozar2012microwave}
+\begin{equation}
+    f_{mn} = \dfrac{c}{2 \pi \sqrt{\mu_r \epsilon_r}} \sqrt{ \left( \dfrac{m\pi}{a} \right)^2 + \left( \dfrac{n\pi}{b} \right)^2},
+\end{equation}
+the comparison is presented in the Table \ref{tab:PeriodComparison} for various modesit can be observed that as the values of m and n increase, the period of oscillation decreases as expected, although the relative error between the simulated and the theoretical values also increases.
 
 \begin{figure}[h!]
     \centering
