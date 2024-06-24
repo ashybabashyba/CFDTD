@@ -692,7 +692,19 @@ where $a$ and $b$ are the lengths of the rectangular box, $(x_0, y_0)$ is the lo
     \label{fig:CFDTD2D_RectangularResonantCavity_NodeEvolution}
 \end{figure}
 
-
+\begin{table}[]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+    \textbf{Mode} & \textbf{Numeric period $[ns]$} & \textbf{Analytic period $[ns]$} & \textbf{Relative error $\%$} \\ \hline
+    $(1, 1)$      & $119.93$                       & $120.21$                        & $0.2$                        \\ \hline
+    $(2, 2)$      & $59.96$                        & $60.10$                         & $0.2$                        \\ \hline
+    $(3, 3)$      & $39.88$                        & $40.07$                         & $0.4$                        \\ \hline
+    $(4, 4)$      & $29.70$                        & $30.05$                         & $1.2$                        \\ \hline
+    \end{tabular}
+    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$.}
+    \label{tab:PeriodComparison}
+    \end{table}
 
 \chapter{Conclusions}
 
