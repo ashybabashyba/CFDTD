@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 
 from cfdtd.CFDTD1D import *
 
+c0 = 3*(10**8)
+
 
 def test_visual_pec_pulse():
     mesh = Mesh(box_size=200.0, pec_sheet_position=150.5, dx=1.0)
@@ -52,7 +54,7 @@ def test_visual_pec_pulse():
             plt.ylim(-2.1, 2.1)
             plt.xlabel('x position [m]')
             plt.ylabel('$E_x$ [V/m]')
-            plt.title(f'Time: {n*solver.dt} [ns]')
+            plt.title(f'Time: {n*solver.dt*1e9/c0} [ns]')
             plt.grid(which='both')
             plt.pause(0.01)  
             plt.cla()
@@ -87,7 +89,7 @@ def test_ElectricField_delay():
     # plt.axvline(x=nonConformalMesh.getPECSheetPosition(), color='r', linestyle='--', label='PEC sheet position')
     # plt.legend()
     # plt.ylim(-2.1, 2.1)
-    # plt.title(f'Time: {final_time*conformalSolver.dt} [ns]')
+    # plt.title(f'Time: {final_time*conformalSolver.dt*1e9/c0} [ns]')
     # plt.xlabel('x position [m]')
     # plt.ylabel('$E_x$ [V/m]')
     # plt.grid(which='both')
