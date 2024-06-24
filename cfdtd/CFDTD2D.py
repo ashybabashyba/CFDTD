@@ -4,6 +4,8 @@ from numba import jit
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
+c0 = 3*(10**8)
+
 @jit(nopython=True, parallel=True)
 def electricFieldStep(Ex_prev, Ey_prev, Hz_prev, dx, dy, dt, left, bottom, area):
     Ex_next = np.zeros(Ex_prev.shape)
@@ -115,7 +117,7 @@ class CFDTD2D():
             probeEx[:,:,n] = Ex[:,:]
             probeEy[:,:,n] = Ey[:,:]
             probeHz[:,:,n] = Hz[:,:]
-            probeTime[n] = t
+            probeTime[n] = t*1e9/c0
             t += self.dt
             # print ("Time step: %d of %d" % (n, nsteps-1))
 
@@ -242,7 +244,7 @@ class CFDTD2D():
         plt.show()
 
     def plotMagneticFieldFrame(self, frame):
-        nsteps = int(frame/self.dt)
+        nsteps = int(frame*c0/self.dt/1e9)
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
 
         plt.imshow(np.transpose(probeHz[:, :, nsteps]), animated=True, vmin=-0.5, vmax=0.5)
@@ -255,7 +257,7 @@ class CFDTD2D():
         plt.show()
 
     def plotElectricFieldXFrame(self, frame):
-        nsteps = int(frame/self.dt)
+        nsteps = int(frame*c0/self.dt/1e9)
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
 
         plt.imshow(np.transpose(probeEx[:, :, nsteps]), animated=True, vmin=-0.5, vmax=0.5)
@@ -268,7 +270,7 @@ class CFDTD2D():
         plt.show()
 
     def plotElectricFieldYFrame(self, frame):
-        nsteps = int(frame/self.dt)
+        nsteps = int(frame*c0/self.dt/1e9)
         probeEx, probeEy, probeHz, probeTime = self.run(nsteps+1)
 
         plt.imshow(np.transpose(probeEy[:, :, nsteps]), animated=True, vmin=-0.5, vmax=0.5)
