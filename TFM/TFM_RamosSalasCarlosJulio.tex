@@ -414,10 +414,10 @@ where $l_x(i,j)$ and $l_y(i,j)$ represents the length of the edge where is assum
         - \dfrac{\Delta t}{\mu_0 \cdot A(i,j)} & \big[ E^{n + 1/2}_x(i,j)\cdot l_x(i,j)- E^{n + 1/2}_x(i,j+1)\cdot l_x(i,j+1)  \\
                                                                        &+  E^{n + 1/2}_y(i+1,j)\cdot l_y(i+1,j) - E^{n + 1/2}_y(i,j)\cdot l_y(i,j)\big].  
     \end{aligned}
-\label{eq:FaradayIntegralEquationRectangularGrid}
+\label{eq:Dey-Mittra_Formula}
 \end{equation}
 
-In the uniform rectangular grid case, if there is no curved surface in the mesh, we have $l_x = \Delta x$, $l_y = \Delta y$ and $A = \Delta x \Delta y$ for any pair $i,j$, then, by replacing these values into the equation \ref{eq:FaradayIntegralEquationRectangularGrid}, we can obtain again the magnetic field iterative formula presented in the equation \ref{eq:FDTDMagneticField2D}.
+In the uniform rectangular grid case, if there is no curved surface in the mesh, we have $l_x = \Delta x$, $l_y = \Delta y$ and $A = \Delta x \Delta y$ for any pair $i,j$, then, by replacing these values into the equation \ref{eq:Dey-Mittra_Formula}, we can obtain again the magnetic field iterative formula presented in the equation \ref{eq:FDTDMagneticField2D}.
 
 The great advantage of this formulation is the fact that we can use it to solve curved PEC surfaces with rectangular grids like the one shown in the Figure \ref{fig:DeyMittraMesh}. Indeed, as said before, the cells thats don't intersect with the curved surface can be solved as stated, on the other hand, in cells with non-empty intersections, we need to consider in the path integral of the electric field another component corresponding to the value of this field over the part of the curved surface inside the cell, however, the field over this path is always zero, for this reason, the construction of the iterative formula of the magnetic field remains valid, but it must be taken into account that the lengths and areas in these cells doesn't have the usual values now. This formulation is knowed as the Dey-Mittra algorithm in two dimensions \cite{DeyMittra1997}.
 
