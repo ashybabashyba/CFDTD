@@ -12,6 +12,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{float}
 
 % =====================
 % = Datos importantes =
@@ -322,7 +323,7 @@ In these two equations, the time step is represented by the superscripts ($n$) w
     H_{y}^{n+1}\left(k+\frac{1}{2}\right) &=H_{y}^{n}\left(k+\frac{1}{2}\right)-\frac{\Delta t}{\mu_{0} \cdot \Delta x}\left[E_{x}^{n+1 / 2}(k+1)-E_{x}^{n+1 / 2}(k)\right].
 \end{align}
 It's important to notice that this formulation assume that the electric and magnetic fields are interleaved in both space and time, this is illustrated in the Figure \ref{fig:sullivaninterleaved}.
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{Imagenes/Sullivan_interleaved.jpg}
     \caption{Interleaving of the electric and magnetic fields in the FDTD formulation. Image taken from \cite{Sullivan2020}.}
@@ -385,7 +386,7 @@ Using the FDTD method with rectangular grid to analyze objects with curved metal
 
 The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two-dimensional PEC using a locally conformal grid \cite{DeyMittra1997}. For two-dimensional problems we can consider for example a quadrant of the cross section of a circular resonator shown in Figure \ref{fig:DeyMittraMesh}; we can see that the magnetic fields over the cells that don't intersects with the curve can be solved with the regular FDTD method, however, we can't use the same algorithm for the others cells; this is because some neighbour nodes of the electric field discretization are no longer able to interact due to the presence of the PEC surface between them. For this reason, we need to introduce another formulation for the FDTD that can be generalized and used for the CFDTD case.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[scale=1.0]{Imagenes/DeyMittra_2DMeshExample.jpg}
     \caption{Example of a rectangular mesh on a curved PEC surface. Image taken from \cite{Dey1997ALC}.}
@@ -437,9 +438,9 @@ Returning to the equation \ref{eq:StabilityAngulo}, there is a problem with this
 In this section, we discuss the CFDTD method implementation along some results that we compare with the literature.
 \section{One-dimensional CFDTD}
 Let's start with the formalism in one dimension. In this case, it is impossible to consider a curved PEC surface because of the dimensions of the mesh, so how can we formulate a 1D CFDTD algorithm? Before thinking about the iterative formula, it is necessary to see that the equivalent of the curved surface in this case is equal to a PEC sheet between two nodes of the mesh as we can see in the Figure \ref{fig:Mesh1D_CFDTD}, following this, we can separate the nodes of the mesh in two groups, the first one being those nodes $n_i$ in such a way that the PEC sheet it's not contained in the intervals $(n_{i-1}, n_i)$ or $(n_i, n_{i+1})$; the second group being those nodes that are "neighbors" of the PEC sheet. 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
-    \includegraphics[scale=1.1]{Imagenes/Mesh1D_CFDTD.png}
+    \includegraphics[scale=1.05]{Imagenes/Mesh1D_CFDTD.png}
     \caption{Example of an uniform mesh for the electric field in one dimension (blue lines) with a PEC sheet between two nodes (red line).}
     \label{fig:Mesh1D_CFDTD}
 \end{figure}
@@ -457,7 +458,7 @@ Where $\Delta x_l + \Delta x_r = \Delta x$ represents the existing distance betw
     H_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t - \dfrac{\Delta t}{2} - \dfrac{\Delta x}{2c}}{s} \right)^2 \right],
 \end{align}
 where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current step of the simulation; in order to simplify the algorithm, we also work with natural units ($c=1$). The python script used to recreate the CFDTD algorithm in one dimension and the tests associated can be found in the attached GitHub repository in the files \texttt{cfdtd/CFDTD1D.py} and \texttt{test/test\_1D.py} respectively. The first result that is expected to be observed is the instability of the solution with some Courant numbers (the constant $k$ in the equation \ref{eq:CFL}) when the PEC sheet node doesn't match with any other node of the mesh, indeed, we can consider a mesh of length equals to $200$ and spatial step $\Delta x = 1.0 \, [m]$ and a PEC sheet positioned at $150.5$; if the behavior of the CFDTD algorithm were the same as that of the FDTD, we expect the solution of the fields to be stable at all time steps, however, this doesn't happen as we can see in the Figure \ref{fig:CFDTD1D_Inestability}.
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -467,44 +468,59 @@ where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current 
         \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Inestibility2.png}
     \end{subfigure}
-    \caption{Propagation of the Gaussian electromagnetic wave with PEC boundary conditions and Courant number equals to $1.0$ in different time steps, on the left in step 65 and on the right in step 80.}
+    \caption{Propagation of the Gaussian electromagnetic wave with PEC boundary conditions and Courant number equals to $1.0$ in different time steps.}
     \label{fig:CFDTD1D_Inestability}
 \end{figure}
 
-We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located $0.5$ before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved two nodes as can be found in the respective test and in the figure \ref{fig:CFDTD1D_DelayNorm}. 
+We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located $0.5$ before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved two nodes as can be found in the respective test. 
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison1.png}
     \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison2.png}
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_DelayDifference1.png}
     \end{subfigure}
 
     \vskip\baselineskip
     
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_DelayDifference2.png}
+    \end{subfigure}
+    
+    \vskip\baselineskip
+
+    \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison3.png}
     \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_DelayDifference3.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_Comparison4.png}
     \end{subfigure}
-    \caption{Comparison between conformal and non conformal solutions of the Gaussian electromagnetic wave in different time steps.}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD1D_DelayDifference4.png}
+    \end{subfigure}
+    \caption{Comparison between conformal and non conformal solutions of the Gaussian electromagnetic wave in different time steps. On the left is the evolution of the wave using both FDTD and CFDTD, on the right is the absolute difference between both solutions.}
     \label{fig:CFDTD1D_Delay}
 \end{figure}
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[scale=0.6]{Imagenes/CFDTD1D_DelayNorm.png}
-    \caption{$L_1$ norm difference between non conformal solution and conformal solution two steps before after two bouncings with the PEC sheet.}
-    \label{fig:CFDTD1D_DelayNorm}
-\end{figure}
-\newpage
 \section{Two-dimensional CFDTD}
 
 Now, unlike the previous case, the CFDTD algorithm in more than one dimension becomes more complicated because there is more freedom in the election of the PEC surface inside the mesh. For this and other reasons, it is necessary to carry out a study on the geometry of the problem before entering the CFDTD-2D algorithm.
@@ -515,7 +531,7 @@ Returning to the formulation of the Dey-Mittra algorithm, the difference between
 
 In some of the codes that have been worked around the FDTD method in two dimensions (such as \cite{Angulo_PyDG1D_2024}), the mesh is obtained through a \texttt{meshgrid} function \cite{harris2020array} which takes as argument the two 1D spatial meshes with spatial steps $\Delta x$ and $\Delta y$. If we want to work similar to the one dimension algortihm, it is necessary to add a number of extra nodes corresponding to the intersection points to the mesh, but what happens if we want to add an extra node to the meshgrid? The answer to this can be seen in the Figure \ref{fig:CFDTD2D_Meshgrid} where we can see that adding just one extra node introduces a number of unused nodes equal to the number of points contemplated by the 1D mesh where said node is not located; this causes us to go from $N_x \times N_y$ points to a total of $(N_x + M_x) \times (N_y + M_y)$ increasing the complexity of the system, where $N_x$ and $N_y$ are the number of nodes of the 1D meshes and $M_x + M_y = M$ is the number of intersection points that can belong to one of the two meshes. 
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -533,7 +549,7 @@ In order to avoid this problem, we propose another way of working with the mesh 
 
 To simplify the problem worked on, we restrict the PEC surface to be a line or a polygon that separates a maximum of one cell into two cells, the intersection points of a cell must be zero or two depending on wether the intersection between the cell and the PEC polygon is empty or not, an example of the 2D mesh with a PEC polygon or PEC line is presented in the Figure \ref{fig:CFDTD2D_MeshPEC}. With this in mind, if we work with a PEC line we can separate the cells in two groups depending on the number of intersection points: the conformal cells with a number of intersections equal to $2$ and the non conformal cells with empty intersection; in a similar way, for the PEC polygon we can separate the cells in three groups: the conformal cells and the outside or inside non conformal cells, the latter depending on whether they are inside or outside the PEC polygon.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -562,9 +578,9 @@ We begin our validation, seeing at the solution obtained from a Gaussian magneti
     H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2}{\sqrt{2} s} \right],
 \label{eq:EyInitialCondition}
 \end{equation}
-where $x_0$ is the first coordinate of the reference cell and $s$ is the spread of the wave. We work with a square mesh of dimensions $100 \times 100$ and spatial steps $\Delta x = \Delta y = 2.0$, inside this mesh we put a rectangular PEC polygon defined by the nodes $(5.5,40.5)$, $(94.5,40.5)$, $(94.5, 60.5)$ and $(5.5, 60.5)$ and we take $(50, 50)$ as the reference cell; then, we put the initial condition defined in equation \ref{eq:EyInitialCondition} inside the PEC polygon and start the solver with a Courant number equals to $0.4$. With these parameters, we expect the evolution of the wave to have a similar behavior as if it were in one dimension, i.e., it only propagates in one direction. The result of our simulation is represented in figure \ref{fig:CFDTD2D_GaussianEy} where the expected behavior is confirmed.
+where $x_0$ is the first coordinate of the reference cell and $s$ is the spread of the wave. We work with a square mesh of dimensions $100 \times 100$ and spatial steps $\Delta x = \Delta y = 1.0 [m]$, inside this mesh we put a rectangular PEC polygon defined by the nodes $(5.5,40.5)$, $(94.5,40.5)$, $(94.5, 60.5)$ and $(5.5, 60.5)$, we take $(50, 50)$ as the reference cell and $s=20$; then, we put the initial condition defined in equation \ref{eq:EyInitialCondition} inside the PEC polygon and start the solver with a Courant number equals to $0.3$. With these parameters, we expect the evolution of the wave to have a similar behavior as if it were in one dimension, i.e., it only propagates in one direction. The result of our simulation is represented in figure \ref{fig:CFDTD2D_GaussianEy} where the expected behavior is confirmed.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -572,31 +588,76 @@ where $x_0$ is the first coordinate of the reference cell and $s$ is the spread 
     \end{subfigure}
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY2.png}
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY1_1D.png}
     \end{subfigure}
 
     \vskip\baselineskip
     
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY2_1D.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY3.png}
     \end{subfigure}
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY3_1D.png}
+    \end{subfigure}
+
+    \vskip\baselineskip
+    
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
         \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY4.png}
     \end{subfigure}
-    \caption{Evolution of a Gaussian pulse defined by equation \ref{eq:EyInitialCondition} inside a rectangular PEC polygon with CFDTD.}
-    \label{fig:CFDTD2D_GaussianEy}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianY4_1D.png}
+    \end{subfigure}
+    \caption{Evolution of a Gaussian pulse defined by equation \ref{eq:EyInitialCondition} inside a rectangular PEC polygon with CFDTD. On the left is the evolution of the 2D mesh, on the right the evolution for a fixed $y$-coordinate.}
+\label{fig:CFDTD2D_GaussianEy}
 \end{figure}
-\newpage
+
 Next we want to study the stability of a initial Gaussian magnetic wave defined by 
 \begin{equation}
     H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2 + (y - y_0)^2}{\sqrt{2} s} \right],
 \label{eq:Gaussian2DInitialCondition}
 \end{equation}
 if we work with a mesh similar to the previous one used but now with $\Delta x = \Delta y = 1.0$, and a rectangular PEC polygon defined by the nodes $(25.5,10.5)$, $(75.5,10.5)$, $(75.5, 95.5)$ and $(25.5, 95.5)$. In this case, we have two tipes of conformal cells, the cells that have $A^{ratio} = 1/4$ and $\max({l^{ratio}}) = 1/2$ (the corner conformal cells); and the cells that have $A^{ratio} = 1/2$ and $\max({l^{ratio}}) = 1$, following the equation \ref{eq:StabilityAngulo}, we observe in both cases that $\Delta t = \Delta t_{CFL}$, so we expect not to observe any instability for any Courant number less or equal to $1$ as seen in the Figure \ref{fig:CFDTD2D_GaussianStability}. On the other hand, if we replace $10.5$ with $10.6$ and $95.5$ with $95.4$ in the nodes of the PEC polygon, we obtain $A^{ratio} = 1/5$ and $\max({l^{ratio}}) = 1/2$ for the corner conformal cells, then, for this cells we have $\Delta t \neq \Delta t_{CFL}$ and we expect to have numerical instability for Courant Number Equal to 1 as shown in Figure \ref{fig:CFDTD2D_GaussianInstability}.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability1.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability2.png}
+    \end{subfigure}
 
-\begin{figure}[h!]
+
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability3.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability4.png}
+    \end{subfigure}
+    \caption{Evolution of a Gaussian 2D magnetic pulse defined by equation \ref{eq:Gaussian2DInitialCondition} inside a rectangular PEC polygon with $\Delta t \neq \Delta t_{CFL}$ and Courant number equal to $1.0$. Instability starts to appear arround $130$ [s].}
+    \label{fig:CFDTD2D_GaussianInstability}
+\end{figure}
+
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -607,7 +668,6 @@ if we work with a mesh similar to the previous one used but now with $\Delta x =
         \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability2.png}
     \end{subfigure}
 
-    \vskip\baselineskip
     
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -618,7 +678,6 @@ if we work with a mesh similar to the previous one used but now with $\Delta x =
         \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianStability4.png}
     \end{subfigure}
 
-    \vskip\baselineskip
     
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -632,31 +691,7 @@ if we work with a mesh similar to the previous one used but now with $\Delta x =
     \label{fig:CFDTD2D_GaussianStability}
 \end{figure}
 
-\begin{figure}[h!]
-    \centering
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability1.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability2.png}
-    \end{subfigure}
 
-    \vskip\baselineskip
-    
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability3.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_GaussianInstability4.png}
-    \end{subfigure}
-    \caption{Evolution of a Gaussian 2D magnetic pulse defined by equation \ref{eq:Gaussian2DInitialCondition} inside a rectangular PEC polygon with $\Delta t \neq \Delta t_{CFL}$ and Courant number equal to $1.0$. Instability starts to appear arround $130$ [s].}
-    \label{fig:CFDTD2D_GaussianInstability}
-\end{figure}
-\newpage
 Finally, we can also study the evolution of a electromagnetic wave inside a rectangular resonant cavity whose initial condition for the TE mode is given by \cite{pozar2012microwave}
 \begin{equation}
     H_z(x, y) = A_{mn}\cos\dfrac{m \pi (x-x_0)}{a} \cos\dfrac{n \pi (y-y_0)}{b},
@@ -666,9 +701,9 @@ where $a$ and $b$ are the lengths of the rectangular box, $(x_0, y_0)$ is the lo
 \begin{equation}
     f_{mn} = \dfrac{c}{2 \pi \sqrt{\mu_r \epsilon_r}} \sqrt{ \left( \dfrac{m\pi}{a} \right)^2 + \left( \dfrac{n\pi}{b} \right)^2},
 \end{equation}
-the comparison is presented in the Table \ref{tab:PeriodComparison} for various modesit can be observed that as the values of m and n increase, the period of oscillation decreases as expected, although the relative error between the simulated and the theoretical values also increases.
+the comparison is presented in the Table \ref{tab:PeriodComparison} for various modesit can be observed that as the values of $m$ and $n$ increase, the period of oscillation decreases as expected, although the relative error between the simulated and the theoretical values also increases.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -682,7 +717,7 @@ the comparison is presented in the Table \ref{tab:PeriodComparison} for various 
     \label{fig:CFDTD2D_RectangularResonantCavity}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
         \centering
@@ -696,17 +731,17 @@ the comparison is presented in the Table \ref{tab:PeriodComparison} for various 
     \label{fig:CFDTD2D_RectangularResonantCavity_NodeEvolution}
 \end{figure}
 
-\begin{table}[]
+\begin{table}[H]
     \centering
+    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$.}
     \begin{tabular}{|c|c|c|c|}
     \hline
     \textbf{Mode} & \textbf{Numerical period $[ns]$} & \textbf{Analytical period $[ns]$} & \textbf{Relative error $\%$} \\ \hline
-    $(1, 1)$      & $119.93$                       & $120.21$                        & $0.2$                        \\ \hline
-    $(2, 2)$      & $59.96$                        & $60.10$                         & $0.2$                        \\ \hline
-    $(3, 3)$      & $39.88$                        & $40.07$                         & $0.4$                        \\ \hline
-    $(4, 4)$      & $29.70$                        & $30.05$                         & $1.2$                        \\ \hline
+    $(1, 1)$      & $399.751$                        & $400.694$                         & $0.235$                        \\ \hline
+    $(2, 2)$      & $199.876$                        & $200.347$                         & $0.235$                        \\ \hline
+    $(3, 3)$      & $132.936$                        & $133.565$                         & $0.471$                        \\ \hline
+    $(4, 4)$      & $98.995$                         & $100.173$                         & $1.176$                        \\ \hline
     \end{tabular}
-    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$.}
     \label{tab:PeriodComparison}
     \end{table}
 
