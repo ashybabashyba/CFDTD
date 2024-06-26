@@ -14,6 +14,7 @@
 \usepackage{subcaption}
 \usepackage{float}
 
+
 % =====================
 % = Datos importantes =
 % =====================
@@ -719,31 +720,27 @@ the comparison is presented in the Table \ref{tab:PeriodComparison} for various 
 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_ResonantRectangularCavity_NodeEvolution1.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_ResonantRectangularCavity_NodeEvolution2.png}
-    \end{subfigure}
-    \caption{Evolution of the magnetic field in time of a specific node inside a resonant rectangular cavity.}
+    \includegraphics[scale=0.8]{Imagenes/CFDTD2D_ResonantRectangularCavity_NodeEvolution_Comparison.png}
+    \caption{Comparison between the numerical solution of the magnetic field and the analytical solution in a specific node.}
     \label{fig:CFDTD2D_RectangularResonantCavity_NodeEvolution}
 \end{figure}
 
 \begin{table}[H]
     \centering
-    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$.}
-    \begin{tabular}{|c|c|c|c|}
+    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$ for the CFDTD method and $(11,11)$, $(96,11)$, $(96, 96)$ and $(11, 96)$ for the FDTD method.}
+    \resizebox*{\textwidth}{!}{
+    \begin{tabular}{|c|c|c|c|c|}
     \hline
-    \textbf{Mode} & \textbf{Numerical period $[ns]$} & \textbf{Analytical period $[ns]$} & \textbf{Relative error $\%$} \\ \hline
-    $(1, 1)$      & $399.751$                        & $400.694$                         & $0.235$                        \\ \hline
-    $(2, 2)$      & $199.876$                        & $200.347$                         & $0.235$                        \\ \hline
-    $(3, 3)$      & $132.936$                        & $133.565$                         & $0.471$                        \\ \hline
-    $(4, 4)$      & $98.995$                         & $100.173$                         & $1.176$                        \\ \hline
-    \end{tabular}
+    \textbf{Mode} & \textbf{CFDTD period $[ns]$} & \textbf{FDTD period $[ns]$} & \textbf{Analytical period $[ns]$} & \textbf{Relative error $\%$} \\ \hline
+    $(1, 1)$      & $399.751$                    & $399.751$                   & $400.694$                         & $0.235$                        \\ \hline
+    $(2, 2)$      & $199.876$                    & $199.876$                   & $200.347$                         & $0.235$                        \\ \hline
+    $(3, 3)$      & $132.936$                    & $132.936$                   & $133.565$                         & $0.471$                        \\ \hline
+    $(4, 4)$      & $98.995$                     & $98.995$                    & $100.173$                         & $1.176$                        \\ \hline
+    \end{tabular}}
     \label{tab:PeriodComparison}
     \end{table}
+
+
 
 \chapter{Conclusions}
 
