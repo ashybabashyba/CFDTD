@@ -14,6 +14,7 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{siunitx}
+\usepackage{hyperref}
 
 
 % =====================
@@ -397,9 +398,6 @@ The CFDTD algorithm was first introduced to made a FDTD analysis of a curved two
     \caption{Example of a rectangular mesh on a curved PEC surface. Image taken from \cite{Dey1997ALC}.}
     \label{fig:DeyMittraMesh}
 \end{figure}
-
-\section{The Dey-Mittra algorithm}
-
 Let's consider a two-dimensional rectangular grid discretization same as the FDTD case. Now, let's consider the Faraday equation in the integral form for the free space given by
 \begin{equation}
     \oint_{\partial S} \boldsymbol{E} \cdot d \boldsymbol{l} = -\dfrac{d}{dt} \int_{S} \mu_0 \boldsymbol{H} \cdot d\boldsymbol{s}.
@@ -431,12 +429,20 @@ The great advantage of this formulation is the fact that we can use it to solve 
 
 As we have seen, the CFDTD method follows a different scheme that the FDTD method in the cells where the curved PEC surface intersects the mesh, since the area and the lengths of some cells changes, we need to find a stability that depends on these variables, then, we need a more restrictive time step stability condition. For example, the condition reported in \cite{7518629} establish that
 \begin{equation}
-    \Delta t_k = \sqrt{3} \sqrt{\dfrac{A_k^{ratio}}{\max \left( l_k^{ratio} \right)}}\Delta t_{CFL} = h_{0, k} \Delta t_{CFL},
+    \Delta t_k = \sqrt{3} \sqrt{\dfrac{A_k^{\text{ratio}}}{\max \left( l_k^{\text{ratio}} \right)}}\Delta t_{CFL} = h_{0, k} \Delta t_{CFL},
 \label{eq:StabilityAngulo}
 \end{equation}
-with $h_{0, k} = \sqrt{3} \sqrt{A_k^{ratio}/\max \left( l_k^{ratio} \right)} \leq 1$. In this equation $k$ represents one of the posibles remaining areas when we consider the cell cut by the curve, $A^{ratio}$ represent the quotient between the remaining area from the usual area of the cell and $l^{ratio}$ the quotient between the cut length of the edge from the usual length (considering al the four posible lengths per cell). This time step is similar to the time step reported in \cite{1638381}, the only difference is the factor $\sqrt{3}$, however, both of these criterias are made for 3D problems, in case we want to work with 1D or 2D problems, we can change the previously factor to $1$ or $\sqrt{2}$ respectively.
+with $h_{0, k} = \sqrt{3} \sqrt{A_k^{\text{ratio}}/\max \left( l_k^{\text{ratio}} \right)} \leq 1$. In this equation $k$ represents one of the posibles remaining areas when we consider the cell cut by the curve, $A^{\text{ratio}}$ represent the quotient between the remaining area from the usual area of the cell and $l^{\text{ratio}}$ the quotient between the cut length of the edge from the usual length (considering al the four posible lengths per cell). This time step is similar to the time step reported in \cite{1638381}, the only difference is the factor $\sqrt{3}$, however, both of these criterias are made for 3D problems, in case we want to work with 2D problems, we need to change the previously factor $\sqrt{2}$.
 
 Returning to the equation \ref{eq:StabilityAngulo}, there is a problem with this formulation, to guarantee the stability of the scheme, we need to look over all the cells of the discretization, making the algorithm inefficient or slow for large problems with short spatial step or problems with complex geometries that require very detailed refinement of the mesh. For this reason, the study of local stability conditions that require only specific information about the problem has been a research objective for both CFDTD and FDTD \cite{7779120}.
+
+\section{CFDTD meshing}
+
+Although the numerical method of the CFDTD method is described by the iterative equations given by the Dey-Mittra algorithm \ref{eq:Dey-Mittra_Formula}, an important part of the formula are the length and area variables that can be extracted from the mesh for a specific cell. 
+
+Several researches have been done on meshing techniques for the CFDTD method as can be seen in \cite{CFDTDMesh1} and \cite{CFDTDMesh2}, in general, an appropiate meshing is very important because it is directly related to the simulation accuracy of the numerical method. Additionally, it is important to optimize the creation or interpretation of the mesh to work with, since in the real world, some objects to be studied, such as airplanes, require a very high number of cells or patches.
+
+Finally, as we could observe in the adapted stability condition in equation \ref{eq:StabilityAngulo}, we see that it is necessary to access the mesh before the numerical method in order to guarantee the stability of the latter, and given that in some cases it might be necessary to access many cells to guarantee the correct choice of the time step, it shows again the importance of creating an efficient and well adapted mesh so that the algorithm is also optimal.
 
 \chapter{CFDTD implementation and results}
 In this section, we discuss the CFDTD method implementation along some results that we compare with the literature. All developed codes are publicly available and can be found in the GitHub repository with the following url \url{https://github.com/ashybabashyba/CFDTD}. 
@@ -704,7 +710,7 @@ where $a$ and $b$ are the lengths of the rectangular box, $(x_0, y_0)$ is the lo
 \begin{equation}
     f_{mn} = \dfrac{c}{2 \pi \sqrt{\mu_r \epsilon_r}} \sqrt{ \left( \dfrac{m\pi}{a} \right)^2 + \left( \dfrac{n\pi}{b} \right)^2},
 \end{equation}
-the comparison is presented in the Table \ref{tab:PeriodComparison} for various modesit can be observed that as the values of $m$ and $n$ increase, the period of oscillation decreases as expected, although the relative error between the simulated and the theoretical values also increases.
+where $\epsilon_r$ and $\mu_r$ are the relative permitivity and permeability respectively, the comparison is presented in the Table \ref{tab:PeriodComparison} for various modes and using both CFDTD and FDTD method, it can be observed that as the values of $m$ and $n$ increase, the period of oscillation decreases as expected, although the relative error between the simulated and the theoretical values also increases. It can also be observed that in this case, since the PEC box has integer dimensions, the period results between both methods are practically the same, however, if the cavity were to have rational dimensions, the periods would be slightly different since the box could not be adjusted to the FDTD mesh. 
 
 \begin{figure}[H]
     \centering
