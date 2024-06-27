@@ -530,33 +530,15 @@ We can also make a comparison between a FDTD solution with PEC boundary conditio
     \label{fig:CFDTD1D_Delay}
 \end{figure}
 
-\section{Two-dimensional CFDTD}
+\section{Two-dimensional mesh creation}
 
 Now, unlike the previous case, the CFDTD algorithm in more than one dimension becomes more complicated because there is more freedom in the election of the PEC surface inside the mesh. For this and other reasons, it is necessary to carry out a study on the geometry of the problem before entering the CFDTD-2D algorithm.
 
-\subsection{Mesh geometry}
-
 Returning to the formulation of the Dey-Mittra algorithm, the difference between the CFDTD and FDTD method lies in the areas and lengths of the cells, so for example, if the curved surface intersects one cell, we need the coordinates of the intersection points to estimate the value of the respective length, for this reason, the coordinates of all existing intersenctions play an important role in the development of the algorithm.
 
-In some of the codes that have been worked around the FDTD method in two dimensions (such as \cite{Angulo_PyDG1D_2024}), the mesh is obtained through a \texttt{meshgrid} function \cite{harris2020array} which takes as argument the two 1D spatial meshes with spatial steps $\Delta x$ and $\Delta y$. If we want to work similar to the one dimension algortihm, it is necessary to add a number of extra nodes corresponding to the intersection points to the mesh, but what happens if we want to add an extra node to the meshgrid? The answer to this can be seen in the Figure \ref{fig:CFDTD2D_Meshgrid} where we can see that adding just one extra node introduces a number of unused nodes equal to the number of points contemplated by the 1D mesh where said node is not located; this causes us to go from $N_x \times N_y$ points to a total of $(N_x + M_x) \times (N_y + M_y)$ increasing the complexity of the system, where $N_x$ and $N_y$ are the number of nodes of the 1D meshes and $M_x + M_y = M$ is the number of intersection points that can belong to one of the two meshes. 
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_Meshgrid1.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{Imagenes/CFDTD2D_Meshgrid2.png}
-    \end{subfigure}
-    \caption{Meshgrid function in python before (left) and after (right) adding as an extra node the point $(5, 5.5)$.}
-    \label{fig:CFDTD2D_Meshgrid}
-\end{figure}
-
-In order to avoid this problem, we propose another way of working with the mesh using polygons and the python library \texttt{shapely} \cite{Gillies_Shapely_2024}, instead of working with all the nodes of the 2D meshgrid with all the intersection points, we characterize the mesh with a total of $(N_x - 1) \times (N_y - 1)$ polygons that represent all the cells contained in the mesh and another polygon used to represent the PEC surface, in this way, it is possible to calculate the lengths and areas of each cell using Boolean operations. 
-
 To simplify the problem worked on, we restrict the PEC surface to be a line or a polygon that separates a maximum of one cell into two cells, the intersection points of a cell must be zero or two depending on wether the intersection between the cell and the PEC polygon is empty or not, an example of the 2D mesh with a PEC polygon or PEC line is presented in the Figure \ref{fig:CFDTD2D_MeshPEC}. With this in mind, if we work with a PEC line we can separate the cells in two groups depending on the number of intersection points: the conformal cells with a number of intersections equal to $2$ and the non conformal cells with empty intersection; in a similar way, for the PEC polygon we can separate the cells in three groups: the conformal cells and the outside or inside non conformal cells, the latter depending on whether they are inside or outside the PEC polygon.
+
+In order to keep the mesh as a simple object and not to increase its mathematical complexity, instead of using a \texttt{meshgrid} or \texttt{array} function \cite{harris2020array}, we propose another way of working with the mesh using polygons and the python library \texttt{shapely} \cite{Gillies_Shapely_2024}, instead of working with all the nodes of the 2D meshgrid with all the intersection points, we characterize the mesh with a total of $(N_x - 1) \times (N_y - 1)$ polygons that represent all the cells contained in the mesh and another polygon used to represent the PEC surface, in this way, it is possible to calculate the lengths and areas of each cell using Boolean operations. 
 
 \begin{figure}[H]
     \centering
@@ -572,11 +554,13 @@ To simplify the problem worked on, we restrict the PEC surface to be a line or a
     \label{fig:CFDTD2D_MeshPEC}
 \end{figure}
 
-Finally, a separation is made so that the mesh knows whether to interpret the lengths or areas depending on whether the wave to be solved is inside or outside the PEC polygon (the option of solving both regions at the same time is excluded). The mesh creation algorithm can be found in the file \texttt{mesh/MESH2D.py} and to guarantee its correct functioning, various tests are carried out such as: that the groups in which the cells are separated are mutually exclusive and the sum of its elements is equal to the total number of cells, that the area of non conformal cells are equal to $\Delta x \Delta y$, that the lengths of non conformal cells are equal to $\Delta x$ or $\Delta y$ and that the sum of lengths of the two cells into which a conformal cell is divided also meets the same previous equality, etc; all of these tests can be found in the file \texttt{test/test\_Mesh\_2D.py}. 
+The mesh creation algorithm can be found in the file \texttt{mesh/MESH2D.py}, this python class includes several routines for creating and accessing the mesh information, it takes as input arguments the size of the box, the spatial step $\Delta x$ and $\Delta y$, a cell reference that has the purpose of determining whether we solve inside or outside the PEC surface and the nodes that characterize the PEC polygon enclosed inside the mesh. The first of these routines corresponds to the detection of the number of unique intersection points between the cell and the PEC polygon through the interpretation of the polygon as a set of lines; the next routine corresponds to the calculation of area using the Boolean difference between the cell and the PEC polygon (or its complement if we want to solve inside the surface) and finally there is a routine that allows measuring the lengths of the cells by means of intersections of sets.
+
+Finally, a separation is made so that the mesh knows whether to interpret the lengths or areas depending on whether the wave to be solved is inside or outside the PEC polygon (the option of solving both regions at the same time is excluded) using the previous three routines. To guarantee the correct functioning of the algorithm, various tests are carried out such as: that the groups in which the cells are separated are mutually exclusive and the sum of its elements is equal to the total number of cells, that the area of non conformal cells are equal to $\Delta x \Delta y$, that the lengths of non conformal cells are equal to $\Delta x$ or $\Delta y$ and that the sum of lengths of the two cells into which a conformal cell is divided also meets the same previous equality, etc; all of these tests can be found in the file \texttt{test/test\_Mesh\_2D.py}. 
 
 The great advantage of the constructed algorithm is its ease of being adapted to any curved PEC surface; it is only necessary to introduce as an argument a list of points corresponding to the intersection points of the curve with the mesh for the construction of the PEC polygon. The difference between working with the curved surface and the polygon is that the areas of the cell can be different, however, for a sufficiently dense mesh, this difference is minimal.
 
-\subsection{Two-dimensional algorithm}
+\section{Two-dimensional CFDTD algorithm}
 
 Once the mesh is built, adapting it to the Dey-Mittra algorithm is relatively easy, it is only necessary to pass the mesh as an argument and when performing the time steps of the electromagnetic fields, call the area and length calculation routine defined in the mesh script for the worked cell. 
 
