@@ -13,6 +13,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{siunitx}
 
 
 % =====================
@@ -271,12 +272,15 @@ Some differential equations in the literature present arduous work to find the a
 
 \chapter{Introduction and objectives}
 
-Over the last few decades, the study of numerical methods has become increasingly important in solving Maxwell's curl equations on space grids defined in the time domain or in the frequency domain \cite{Taflove2005}. In many occasions the analytical solution of a partial differential equation of this style is very difficult and requires a lot of work, even in some cases, it is even impossible to achieve such a solution, therefore, interest has arisen in the development of various computational methods that allow us to solve such problems numerically and guaranteeing enough accuracy.
+Mathematical models in science and engineering are usually differential or integral equations, which in many occasions are difficult to find analytical solutions or may even lack them. With the rapid development of computers with high processing speed, attempts have been made to use them to find solutions to these mathematical models in order to optimize and reduce the time spent to solve them. However, a computer is unable to find the exact solution to all mathematical models and in order to approximate the solution it is necessary to implement a numerical method \cite{Johnson1987}.
 
-There are a lot of different numerical methods that allow solving electromagnetism problems depending on whether you work in the time or frequency domain, among them we can highlight the \textit{Finite Difference in Time Domain method} (FDTD) which is quite powerful when solving problems involving many interactions or scattering \cite{Tekbas2017}, however, this method has problems when trying to solve very complex geometries that require a spatial mesh with a very small distance between nodes, because in these cases, as the temporal step is restricted by the spatial one, the execution time increases considerably; additionally, when trying to use the method on curved surfaces, an inaccuracy error also appears on these objects \cite{Dey1997ALC}, making the method less effective in these cases. Historically, the study of FDTD began in 1966 with the introduction of the algorithm by Yee. Since then, given its great usefulness, various investigations have been developed around achieving applications in other areas, establishing numerical stability conditions, and expanding the method. Dey \& Mittra \cite{DeyMittra1997} implemented a new formulation of the algorithm that could respond to the behavior of electromagnetic fields when they interact with a surface composed of a perfect electrical conductor using a rectangular mesh and that could also resolve the cases contemplated by FDTD, this new algorithm is known as \textit{Conformal Finite Difference in the Time Domain} (CFDTD), which despite bringing the previously explained advantage, results in an extra restriction on the time step to guarantee stability. The Dey-Mittra algorithm was initially introduced in 1997 and since then it has also been an object of study, especially due to its alteration to the stability condition.
+The most important equations in electromagnetism are the well-known Maxwell's equations, which depending on the geometry of the problem to be solved can also be very complicated to find a solution, for this reason, many numerical methods were developed in order to be applied to this case. In particular, if we focus on the rotational equations, the \textit{Finite Difference in Time Domain} method (FDTD) stands out because it does not require as input argument the electromagnetic potentials but only a volumetric mesh of the space and the incident wave \cite{Taflove2005}. The FDTD method has as advantages that the resulting matrices when linearizing the problem are sparse, so it is a fairly optimal method and its stability condition is quite well studied. However, this method has problems when trying to solve very complex geometries that require a spatial mesh with a very small distance between nodes, because in these cases, as the temporal step is restricted by the spatial one, the execution time increases considerably; additionally, when trying to use the method on curved surfaces, an inaccuracy error also appears on these objects \cite{Dey1997ALC}, making the method less effective in these cases.
+
+In order to be able to extend the FDTD method when you want to study curved surfaces but still use a rectangular mesh, the \textit{Conformal Finite Diference in Time Domain} method (CFDTD) was introduced by Dey and Mittra \cite{DeyMittra1997} as a first approximation, in this method, it is considered that the curved surface is composed of a \textit{Perfect Electric Conductor} (PEC) and the iterative equation for the evolution of the magnetic field is modified to be able to solve in all the cells of the discretization. This method has the great advantage of eliminating staircassing errors that arise when making inaccurate approximations of the geometry \cite{Dey1997ALC} without having to change the simple mesh used by the FDTD method at the cost of having to restrict the time step of the simulation to guarantee numerical stability.
 
 The main objective of this work is the creation and validation of a CFDTD algorithm in Python in both one and two dimensions. For this, it is also necessary in the case of two dimensions to create and construct a meshing algorithm that allows us to recover all the information on the geometry of the problem that the numerical method may later require. Finally, to validate what was done, comparisons will be made both with the FDTD algorithm and with the analytical solution of some problems related to resonance in cavities.
 
+In the next chapters, we will explore the main themes of this work. We will begin with a review of the FDTD method in both one and two dimensions along with its respective stability condition. In the next chapter, we will review the CFDTD method along with the Dey-Mittra algorithm and its modified stability condition. Finally, the implementations carried out will be shown along with the results obtained.
 
 \chapter{Maxwell's equations and the FDTD method}
 
@@ -318,10 +322,10 @@ These equations represents a plane wave traveling through the $z$ direction. Tak
     \frac{E_x^{n+\frac{1}{2}}(k)-E_x^{n-\frac{1}{2}}(k)}{\Delta t} &=-\frac{1}{\epsilon_0}\frac{H_y^n \left(k+\frac{1}{2}\right) - H_y^n\left(k-\frac{1}{2}\right)}{\Delta x}, \\
     \frac{H_y^{n+1} \left(k+\frac{1}{2}\right) -H_y^{n}\left( k +\frac{1}{2}\right)}{\Delta t} &=-\frac{1}{\mu_0}\frac{E_x^{n+\frac{1}{2}} \left(k+1\right) - E_x^{n+\frac{1}{2}}\left(k\right)}{\Delta x}.
 \end{align}
-In these two equations, the time step is represented by the superscripts ($n$) while the argument inside functions represent the spatial step ($k$), so the current time and distance are given by $t = \Delta t \cdot n$ and $z = \Delta x \cdot k$. Finally, we can rearrenge the last equations to obtain the next iterative equations
+In these two equations, the time step is represented by the superscripts ($n$) while the argument inside functions represent the spatial step ($k$), so the current time and distance are given by $t = n\Delta t $ and $z = k\Delta x$. Finally, we can rearrenge the last equations to obtain the next iterative equations
 \begin{align}
-    E_{x}^{n+1 / 2}(k) &=E_{x}^{n-1 / 2}(k)-\frac{\Delta t}{\epsilon_{0} \cdot \Delta x}\left[H_{y}^{n}\left(k+\frac{1}{2}\right)-H_{y}^{n}\left(k-\frac{1}{2}\right)\right], \\
-    H_{y}^{n+1}\left(k+\frac{1}{2}\right) &=H_{y}^{n}\left(k+\frac{1}{2}\right)-\frac{\Delta t}{\mu_{0} \cdot \Delta x}\left[E_{x}^{n+1 / 2}(k+1)-E_{x}^{n+1 / 2}(k)\right].
+    E_{x}^{n+1 / 2}(k) &=E_{x}^{n-1 / 2}(k)-\frac{\Delta t}{\epsilon_{0}  \Delta x}\left[H_{y}^{n}\left(k+\frac{1}{2}\right)-H_{y}^{n}\left(k-\frac{1}{2}\right)\right], \\
+    H_{y}^{n+1}\left(k+\frac{1}{2}\right) &=H_{y}^{n}\left(k+\frac{1}{2}\right)-\frac{\Delta t}{\mu_{0}  \Delta x}\left[E_{x}^{n+1 / 2}(k+1)-E_{x}^{n+1 / 2}(k)\right].
 \end{align}
 It's important to notice that this formulation assume that the electric and magnetic fields are interleaved in both space and time, this is illustrated in the Figure \ref{fig:sullivaninterleaved}.
 \begin{figure}[H]
@@ -334,7 +338,7 @@ It's important to notice that this formulation assume that the electric and magn
 
 We have seen that to evolve the field in a node we require the neighboring nodes of the other field, but then, what happens with the electric field in the nodes at the ends of the mesh? These nodes only have one neighbor magnetic field so it is not possible to apply the iterative formula of the FDTD algortihm. In order to compute the electric field at those positions, it is necessary to introduce boundary conditions, for example, the perfect electric conductor boundary condition states that the electric field on these nodes are equals to $0$ causing the electromagnetic wave to "bounce" when interacting with the ends of the mesh; another possible solution is the periodic boundary condition which are characterized as follows
 \begin{equation}
-    E_x^{n+1/2}(0) = E_x^{n-1/2}(0) - \dfrac{\Delta t}{\epsilon 0 \cdot \Delta x}\left[H_{y}^{n}\left(\frac{1}{2}\right)-H_{y}^{n}\left(N-\frac{1}{2}\right)\right],
+    E_x^{n+1/2}(0) = E_x^{n-1/2}(0) - \dfrac{\Delta t}{\epsilon_0 \Delta x}\left[H_{y}^{n}\left(\frac{1}{2}\right)-H_{y}^{n}\left(N-\frac{1}{2}\right)\right],
 \end{equation} 
 where $N$ is the number of cells in the mesh and $E_x(N) = E_x(0)$ for all the time steps. Another example of boundary conditions is the Mur absorption condition, which allows to nullify the fields arriving at the boundary so that there are no bounces, similarly, there is also the Perfectly Matched Layer (PML) condition, which is also an absorption condition used in scattering problems in order to make it easier to distinguish between the incident wave and the one reflected by the material.
 
@@ -404,8 +408,8 @@ Let's consider a two-dimensional rectangular grid discretization same as the FDT
 If we assume that the electric fields are constant along the edges between the nodes, that the magnetics fields are also constant in the worked cell and if we are working on the TE mode, we can obtain from the equation \ref{eq:FaradayIntegralEquation} the following relation
 \begin{equation}
 \begin{aligned}
-    -\mu_0 \cdot A(i,j)\dfrac{\partial}{\partial t} H_z\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= E_x(i,j)\cdot l_x(i,j) - E_x(i,j+1) \cdot l_x(i,j+1) \\
-                                                                                                   &+ E_y(i+1,j)\cdot l_y(i+1,j) - E_y(i,j)\cdot l_y(i,j),  
+    -\mu_0  A(i,j)\dfrac{\partial}{\partial t} H_z\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= E_x(i,j) l_x(i,j) - E_x(i,j+1) l_x(i,j+1) \\
+                                                                                                   &+ E_y(i+1,j) l_y(i+1,j) - E_y(i,j) l_y(i,j),  
 \end{aligned}
 \label{eq:FaradayIntegralEquationRectangularGrid}
 \end{equation}
@@ -413,8 +417,8 @@ where $l_x(i,j)$ and $l_y(i,j)$ represents the length of the edge where is assum
 \begin{equation}
     \begin{aligned}
         H_z^{n + 1}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right) &= H_z^{n}\left( i + \dfrac{1}{2}, j + \dfrac{1}{2} \right)  \\
-        - \dfrac{\Delta t}{\mu_0 \cdot A(i,j)} & \big[ E^{n + 1/2}_x(i,j)\cdot l_x(i,j)- E^{n + 1/2}_x(i,j+1)\cdot l_x(i,j+1)  \\
-                                                                       &+  E^{n + 1/2}_y(i+1,j)\cdot l_y(i+1,j) - E^{n + 1/2}_y(i,j)\cdot l_y(i,j)\big].  
+        - \dfrac{\Delta t}{\mu_0 A(i,j)} & \big[ E^{n + 1/2}_x(i,j) l_x(i,j)- E^{n + 1/2}_x(i,j+1) l_x(i,j+1)  \\
+                                                                       &+  E^{n + 1/2}_y(i+1,j) l_y(i+1,j) - E^{n + 1/2}_y(i,j) l_y(i,j)\big].  
     \end{aligned}
 \label{eq:Dey-Mittra_Formula}
 \end{equation}
@@ -435,17 +439,15 @@ with $h_{0, k} = \sqrt{3} \sqrt{A_k^{ratio}/\max \left( l_k^{ratio} \right)} \le
 Returning to the equation \ref{eq:StabilityAngulo}, there is a problem with this formulation, to guarantee the stability of the scheme, we need to look over all the cells of the discretization, making the algorithm inefficient or slow for large problems with short spatial step or problems with complex geometries that require very detailed refinement of the mesh. For this reason, the study of local stability conditions that require only specific information about the problem has been a research objective for both CFDTD and FDTD \cite{7779120}.
 
 \chapter{CFDTD implementation and results}
-
-In this section, we discuss the CFDTD method implementation along some results that we compare with the literature.
+In this section, we discuss the CFDTD method implementation along some results that we compare with the literature. All developed codes are publicly available and can be found in the GitHub repository with the following url \url{https://github.com/ashybabashyba/CFDTD}. 
 \section{One-dimensional CFDTD}
 Let's start with the formalism in one dimension. In this case, it is impossible to consider a curved PEC surface because of the dimensions of the mesh, so how can we formulate a 1D CFDTD algorithm? Before thinking about the iterative formula, it is necessary to see that the equivalent of the curved surface in this case is equal to a PEC sheet between two nodes of the mesh as we can see in the Figure \ref{fig:Mesh1D_CFDTD}, following this, we can separate the nodes of the mesh in two groups, the first one being those nodes $n_i$ in such a way that the PEC sheet it's not contained in the intervals $(n_{i-1}, n_i)$ or $(n_i, n_{i+1})$; the second group being those nodes that are "neighbors" of the PEC sheet. 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=1.05]{Imagenes/Mesh1D_CFDTD.png}
+    \includegraphics[scale=1]{Imagenes/Mesh1D_CFDTD.png}
     \caption{Example of an uniform mesh for the electric field in one dimension (blue lines) with a PEC sheet between two nodes (red line).}
     \label{fig:Mesh1D_CFDTD}
 \end{figure}
-
 In the first group of nodes (the non frontier nodes), for both the electric and magnetic field, we can again use the usual FDTD iterative formula because the distance between neighboring nodes remains equal to $\Delta x$. However, for the neighbor nodes of the PEC sheet, we need to change the iterative equations because the existence of the irregularity, in order to formulate a possible solution, we can consider the PEC sheet position like another node of the electric field mesh adding one degree of freedom to the magnetic and electric field solution (remembering that the solution of the electric field must be equal to zero at all times in this extra node); with this in mind, we can use a linear interpolation in order to formulate a valid iterative formula, then, if $k_p$ represents the PEC sheet node in the electric field mesh, we have the following equations
 \begin{align}
     H_y^{n+1} \left( k_p - \dfrac{1}{2} \right) &= H_y^{n} \left( k_p - \dfrac{1}{2} \right) + \dfrac{\Delta t}{\mu_0 \Delta x_l}E_x^{n+1/2}(k_p - 1), \\
@@ -455,10 +457,10 @@ In the first group of nodes (the non frontier nodes), for both the electric and 
 \end{align}
 Where $\Delta x_l + \Delta x_r = \Delta x$ represents the existing distance between the PEC sheet node to the left and right node respectively. With these equations already formulated, we can start with the study and validation of our implementation; the electromagnetic wave to study is a Gaussian pulse defined by the initial pulse
 \begin{align}
-    E_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t}{s} \right)^2 \right], \\
-    H_0 (k_0) &= \Delta t * exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t - \dfrac{\Delta t}{2} - \dfrac{\Delta x}{2c}}{s} \right)^2 \right],
+    E_0 (k_0) &= \Delta t  \exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t}{s} \right)^2 \right], \\
+    H_0 (k_0) &= \Delta t  \exp \left[-0.5 \left( \dfrac{t_0 - n \Delta t - \dfrac{\Delta t}{2} - \dfrac{\Delta x}{2c}}{s} \right)^2 \right],
 \end{align}
-where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current step of the simulation; in order to simplify the algorithm, we also work with natural units ($c=1$). The python script used to recreate the CFDTD algorithm in one dimension and the tests associated can be found in the attached GitHub repository in the files \texttt{cfdtd/CFDTD1D.py} and \texttt{test/test\_1D.py} respectively. The first result that is expected to be observed is the instability of the solution with some Courant numbers (the constant $k$ in the equation \ref{eq:CFL}) when the PEC sheet node doesn't match with any other node of the mesh, indeed, we can consider a mesh of length equals to $200$ and spatial step $\Delta x = 1.0 \, [m]$ and a PEC sheet positioned at $150.5$; if the behavior of the CFDTD algorithm were the same as that of the FDTD, we expect the solution of the fields to be stable at all time steps, however, this doesn't happen as we can see in the Figure \ref{fig:CFDTD1D_Inestability}.
+where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current step of the simulation; in order to simplify the algorithm, we also work with natural units ($c=1$). The python script used to recreate the CFDTD algorithm in one dimension and the tests associated can be found in the attached GitHub repository in the files \texttt{cfdtd/CFDTD1D.py} and \texttt{test/test\_1D.py} respectively. The first result that is expected to be observed is the instability of the solution with some Courant numbers (the constant $k$ in the equation \ref{eq:CFL}) when the PEC sheet node doesn't match with any other node of the mesh, indeed, we can consider a mesh of length equals to \qty{200}{\metre} and spatial step $\Delta x =$\qty{1.0}{\metre} and a PEC sheet positioned at \qty{150.5}{\metre}; if the behavior of the CFDTD algorithm were the same as that of the FDTD, we expect the solution of the fields to be stable at all time steps, however, this doesn't happen as we can see in the Figure \ref{fig:CFDTD1D_Inestability}.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
@@ -473,7 +475,7 @@ where $s$ is the spread of the wave, $t_0$ the initial time and $n$ the current 
     \label{fig:CFDTD1D_Inestability}
 \end{figure}
 
-We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located $0.5$ before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved two nodes as can be found in the respective test. 
+We can also make a comparison between a FDTD solution with PEC boundary conditions and a CFDTD solution with also PEC boundary conditions but with the PEC sheet position located \qty{0.5}{m} before the right end of the mesh, we expect to see a delay of the non conformal solution with respect to the conformal solution just after bouncing the PEC sheet, this delay should increase depending on the number of times the wave has interacted with the PEC surface, as seen in the Figure \ref{fig:CFDTD1D_Delay}. In particular, we can corroborate that the conformal solution after two bounces is the same as the non conformal one but moved two nodes as can be found in the respective test. 
 
 \begin{figure}[H]
     \centering
@@ -564,7 +566,7 @@ To simplify the problem worked on, we restrict the PEC surface to be a line or a
     \label{fig:CFDTD2D_MeshPEC}
 \end{figure}
 
-Finally, a separation is made so that the mesh knows whether to interpret the lengths or areas depending on whether the wave to be solved is inside or outside the PEC polygon (the option of solving both regions at the same time is excluded). The mesh creation algorithm can be found in the file \texttt{mesh/MESH2D.py} and to guarantee its correct functioning, various tests are carried out such as: that the groups in which the cells are separated are mutually exclusive and the sum of its elements is equal to the total number of cells, that the area of non conformal cells are equal to $\Delta x \Delta y$, that the lengths of non conformal cells are equal to $\Delta x$ or $\Delta y$ and that the sum of lengths of the two cells into which a conformal cell is divided also meets the same previous equality, etc; all of these tests can be found in the file \textit{test/test\_Mesh\_2D.py}. 
+Finally, a separation is made so that the mesh knows whether to interpret the lengths or areas depending on whether the wave to be solved is inside or outside the PEC polygon (the option of solving both regions at the same time is excluded). The mesh creation algorithm can be found in the file \texttt{mesh/MESH2D.py} and to guarantee its correct functioning, various tests are carried out such as: that the groups in which the cells are separated are mutually exclusive and the sum of its elements is equal to the total number of cells, that the area of non conformal cells are equal to $\Delta x \Delta y$, that the lengths of non conformal cells are equal to $\Delta x$ or $\Delta y$ and that the sum of lengths of the two cells into which a conformal cell is divided also meets the same previous equality, etc; all of these tests can be found in the file \texttt{test/test\_Mesh\_2D.py}. 
 
 The great advantage of the constructed algorithm is its ease of being adapted to any curved PEC surface; it is only necessary to introduce as an argument a list of points corresponding to the intersection points of the curve with the mesh for the construction of the PEC polygon. The difference between working with the curved surface and the polygon is that the areas of the cell can be different, however, for a sufficiently dense mesh, this difference is minimal.
 
@@ -579,7 +581,7 @@ We begin our validation, seeing at the solution obtained from a Gaussian magneti
     H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2}{\sqrt{2} s} \right],
 \label{eq:EyInitialCondition}
 \end{equation}
-where $x_0$ is the first coordinate of the reference cell and $s$ is the spread of the wave. We work with a square mesh of dimensions $100 \times 100$ and spatial steps $\Delta x = \Delta y = 1.0 [m]$, inside this mesh we put a rectangular PEC polygon defined by the nodes $(5.5,40.5)$, $(94.5,40.5)$, $(94.5, 60.5)$ and $(5.5, 60.5)$, we take $(50, 50)$ as the reference cell and $s=20$; then, we put the initial condition defined in equation \ref{eq:EyInitialCondition} inside the PEC polygon and start the solver with a Courant number equals to $0.3$. With these parameters, we expect the evolution of the wave to have a similar behavior as if it were in one dimension, i.e., it only propagates in one direction. The result of our simulation is represented in figure \ref{fig:CFDTD2D_GaussianEy} where the expected behavior is confirmed.
+where $x_0$ is the first coordinate of the reference cell and $s$ is the spread of the wave. We work with a square mesh of dimensions \qty{100}{\metre}$\times$\qty{100}{\metre} and spatial steps $\Delta x = \Delta y =$\qty{1.0}{\metre}, inside this mesh we put a rectangular PEC polygon defined by the nodes $(5.5,40.5)$, $(94.5,40.5)$, $(94.5, 60.5)$ and $(5.5, 60.5)$, we take $(50, 50)$ as the reference cell and $s=20$; then, we put the initial condition defined in equation \ref{eq:EyInitialCondition} inside the PEC polygon and start the solver with a Courant number equals to $0.3$. With these parameters, we expect the evolution of the wave to have a similar behavior as if it were in one dimension, i.e., it only propagates in one direction. The result of our simulation is represented in figure \ref{fig:CFDTD2D_GaussianEy} where the expected behavior is confirmed.
 
 \begin{figure}[H]
     \centering
@@ -633,7 +635,7 @@ Next we want to study the stability of a initial Gaussian magnetic wave defined 
     H_{0z}(x,y) = \exp \left[ - \dfrac{(x - x_0)^2 + (y - y_0)^2}{\sqrt{2} s} \right],
 \label{eq:Gaussian2DInitialCondition}
 \end{equation}
-if we work with a mesh similar to the previous one used but now with $\Delta x = \Delta y = 1.0$, and a rectangular PEC polygon defined by the nodes $(25.5,10.5)$, $(75.5,10.5)$, $(75.5, 95.5)$ and $(25.5, 95.5)$. In this case, we have two tipes of conformal cells, the cells that have $A^{ratio} = 1/4$ and $\max({l^{ratio}}) = 1/2$ (the corner conformal cells); and the cells that have $A^{ratio} = 1/2$ and $\max({l^{ratio}}) = 1$, following the equation \ref{eq:StabilityAngulo}, we observe in both cases that $\Delta t = \Delta t_{CFL}$, so we expect not to observe any instability for any Courant number less or equal to $1$ as seen in the Figure \ref{fig:CFDTD2D_GaussianStability}. On the other hand, if we replace $10.5$ with $10.6$ and $95.5$ with $95.4$ in the nodes of the PEC polygon, we obtain $A^{ratio} = 1/5$ and $\max({l^{ratio}}) = 1/2$ for the corner conformal cells, then, for this cells we have $\Delta t \neq \Delta t_{CFL}$ and we expect to have numerical instability for Courant Number Equal to 1 as shown in Figure \ref{fig:CFDTD2D_GaussianInstability}.
+if we work with a mesh similar to the previous one used but now with $\Delta x = \Delta y =$\qty{1.0}{\metre}, and a rectangular PEC polygon defined by the nodes $(25.5,10.5)$, $(75.5,10.5)$, $(75.5, 95.5)$ and $(25.5, 95.5)$. In this case, we have two tipes of conformal cells, the cells that have $A^{\text{ratio}} = 1/4$ and $\max({l^{\text{ratio}}}) = 1/2$ (the corner conformal cells); and the cells that have $A^{\text{ratio}} = 1/2$ and $\max({l^{\text{ratio}}}) = 1$, following the equation \ref{eq:StabilityAngulo}, we observe in both cases that $\Delta t = \Delta t_{CFL}$, so we expect not to observe any instability for any Courant number less or equal to $1$ as seen in the Figure \ref{fig:CFDTD2D_GaussianStability}. On the other hand, if we replace $10.5$ with $10.6$ and $95.5$ with $95.4$ in the nodes of the PEC polygon, we obtain $A^{\text{ratio}} = 1/5$ and $\max({l^{\text{ratio}}}) = 1/2$ for the corner conformal cells, then, for this cells we have $\Delta t \neq \Delta t_{CFL}$ and we expect to have numerical instability for Courant Number Equal to 1 as shown in Figure \ref{fig:CFDTD2D_GaussianInstability}.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -727,11 +729,11 @@ the comparison is presented in the Table \ref{tab:PeriodComparison} for various 
 
 \begin{table}[H]
     \centering
-    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$ for the CFDTD method and $(11,11)$, $(96,11)$, $(96, 96)$ and $(11, 96)$ for the FDTD method.}
+    \caption{Comparison between the numerical and theoretical period of diverse modes of a square resonant cavity defined by the nodes $(10.5,10.5)$, $(95.5,10.5)$, $(95.5, 95.5)$ and $(10.5, 95.5)$ for the CFDTD method and $(11,11)$, $(96,11)$, $(96, 96)$ and $(11, 96)$ for the FDTD method, both using a Courant number equal to $0.4$.}
     \resizebox*{\textwidth}{!}{
     \begin{tabular}{|c|c|c|c|c|}
     \hline
-    \textbf{Mode} & \textbf{CFDTD period $[ns]$} & \textbf{FDTD period $[ns]$} & \textbf{Analytical period $[ns]$} & \textbf{Relative error $\%$} \\ \hline
+    \textbf{Mode} & \textbf{CFDTD period [\si{\nano\second}]} & \textbf{FDTD period [\si{\nano\second}]} & \textbf{Analytical period [\si{\nano\second}]} & \textbf{Relative error \%} \\ \hline
     $(1, 1)$      & $399.751$                    & $399.751$                   & $400.694$                         & $0.235$                        \\ \hline
     $(2, 2)$      & $199.876$                    & $199.876$                   & $200.347$                         & $0.235$                        \\ \hline
     $(3, 3)$      & $132.936$                    & $132.936$                   & $133.565$                         & $0.471$                        \\ \hline
@@ -748,11 +750,8 @@ In this work, a review and implementation of conformal finite differences in the
 
 For the two-dimensional case, a Python class was built for meshing where instead of interpreting the grid by nodes, it is interpreted through polygons in order to reduce the complexity of the problem for problems with large geometries. In order to guarantee the correct operation of the routines of this class, several tests were developed to check and verify the proper behavior in particular cases.
 
-The Dey-Mittra algorithm was implemented in order to adapt the two-dimensional solver to solve problems requiring CFDTD, the evolution of a "1.5 "D Gaussian pulse was studied to observe behaviors similar to the evolution of a 1D Gaussian wave. The stability behavior according to the PEC polygon using a 2D Gaussian wave was observed, seeing that in the case where the conformal cells are divided into two groups characterized by $A^{ratio} = 1/4$ and $\max({l^{ratio}}) = 1/2$ and $A^{ratio} = 1/2$ and $\max({l^{ratio}}) = 1$, the FDTD stability condition is recovered. Finally, the evolution of a wave inside a rectangular resonant cavity is studied, observing for the TE mode the expected periodicity effects for all fields. 
+The Dey-Mittra algorithm was implemented in order to adapt the two-dimensional solver to solve problems requiring CFDTD, the evolution of a "1.5 "D Gaussian pulse was studied to observe behaviors similar to the evolution of a 1D Gaussian wave. The stability behavior according to the PEC polygon using a 2D Gaussian wave was observed, seeing that in the case where the conformal cells are divided into two groups characterized by $A^{\text{ratio}} = 1/4$ and $\max({l^{\text{ratio}}}) = 1/2$, and $A^{\text{ratio}} = 1/2$ and $\max({l^{\text{ratio}}}) = 1$, the FDTD stability condition is recovered. Finally, the evolution of a wave inside a rectangular resonant cavity is studied, observing for the TE mode the expected periodicity effects for all fields. 
 
-\chapter{Annexes}
-
-All developed codes are publicly available and can be found in the GitHub repository with the following url \url{https://github.com/ashybabashyba/CFDTD}. We work on this platform in order to facilitate its review, contribution and reuse.
 
 % \chapter{Los enunciados}
 
