@@ -15,6 +15,7 @@
 \usepackage{float}
 \usepackage{siunitx}
 \usepackage{hyperref}
+\usepackage{pdfpages}
 
 
 % =====================
@@ -235,6 +236,8 @@
 
 \maketitle
 
+\includepdf[pages=1]{DeclaracionOriginalidadTFM.pdf}
+
 \frontmatter
 \tableofcontents
 
@@ -275,7 +278,7 @@ Some differential equations in the literature present arduous work to find the a
 
 Mathematical models in science and engineering are usually differential or integral equations, which in many occasions are difficult to find analytical solutions or may even lack them. With the rapid development of computers with high processing speed, attempts have been made to use them to find solutions to these mathematical models in order to optimize and reduce the time spent to solve them. However, a computer is unable to find the exact solution to all mathematical models and in order to approximate the solution it is necessary to implement a numerical method \cite{Johnson1987}.
 
-The most important equations in electromagnetism are the well-known Maxwell's equations, which depending on the geometry of the problem to be solved can also be very complicated to find a solution, for this reason, many numerical methods were developed in order to be applied to this case. In particular, if we focus on the curl equations, the \textit{Finite Difference in Time Domain} method (FDTD) stands out because it does not require as input argument the electromagnetic potentials but only a volumetric mesh of the space and the incident wave \cite{Taflove2005}. The FDTD method has as advantages that the resulting matrices when linearizing the problem are sparse, so it is a fairly optimal method and its stability condition is quite well studied. However, this method has problems when trying to solve very complex geometries that require a spatial mesh with a very small distance between nodes, because in these cases, as the temporal step is restricted by the spatial one, the execution time increases considerably; additionally, when trying to use the method on curved surfaces, an inaccuracy error also appears on these objects \cite{Dey1997ALC}, making the method less effective in these cases.
+The most important equations in electromagnetism are the well-known Maxwell's equations, which depending on the geometry of the problem to be solved can also be very complicated to find a solution, for this reason, many numerical methods were developed in order to be applied to this case. In particular, if we focus on the curl equations, the \textit{Finite Difference in Time Domain} method (FDTD) stands out  \cite{Taflove2005}, this method has as advantages that the resulting matrices when linearizing the problem are sparse, so it is a fairly optimal method and its stability condition is quite well studied. However, this method has problems when trying to solve very complex geometries that require a spatial mesh with a very small distance between nodes, because in these cases, as the temporal step is restricted by the spatial one, the execution time increases considerably. Additionally, since the FDTD method uses the creation of meshes with orthogonal coordinates to each other for the solution of the maxwell equations, this results in the cells having rectangular shapes. For this reason, when trying to use the method on curved surfaces, an inaccuracy error also appears on these objects \cite{Dey1997ALC}, due to the inability to adapt most of the curved surfaces to rectangles.
 
 In order to be able to extend the FDTD method when you want to study curved surfaces but still use a rectangular mesh, the \textit{Conformal Finite Difference in Time Domain} method (CFDTD) was introduced by Dey and Mittra \cite{DeyMittra1997} as a first approximation, in this method, it is considered that the curved surface is composed of a \textit{Perfect Electric Conductor} (PEC) and the iterative equation for the evolution of the magnetic field is modified to be able to solve in all the cells of the discretization. This method has the great advantage of eliminating staircasing errors that arise when making inaccurate approximations of the geometry \cite{Dey1997ALC} without having to change the simple mesh used by the FDTD method at the cost of having to restrict the time step of the simulation to guarantee numerical stability.
 
