@@ -167,6 +167,9 @@ class CFDTD2D():
         fig.canvas.mpl_connect('key_press_event', onClick)
 
         plt.colorbar()
+
+        # anim.save('RectangularResonantCavity.gif', writer='pillow')
+
         plt.show()
 
     def plotElectricFieldXAnimation(self, nsteps):
