@@ -3,7 +3,7 @@ import math
 from matplotlib import pyplot as plt
 
 class InitialPulse():
-    def __init__(self, mesh, initial_position, spread, pulse_type, m=None, n=None):
+    def __init__(self, mesh, initial_position, spread, pulse_type=None, m=None, n=None):
         self.center = initial_position
         self.spread = spread
         self.type = pulse_type
@@ -16,8 +16,22 @@ class InitialPulse():
         self.Ey = np.zeros((self.mesh.gridEx.size, self.mesh.gridEy.size))
         self.Hz = np.zeros((self.mesh.gridHx.size, self.mesh.gridHy.size))
 
+    def illuminationGaussianHy(location, center, amplitude, spread):
+        def function(t):
+            return np.exp( - ((t-center)/spread)**2/2) * amplitude
+        
+        gaussian_source = {
+            'location': location,
+            'function': function
+        }
+        
+        return gaussian_source
+
     def buildPulse(self):
-        if self.type == "Magnetic Gaussian":
+        if self.type is None:
+            return self.Ex, self.Ey, self.Hz
+
+        elif self.type == "Magnetic Gaussian":
             self.Hz = magneticGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
         elif self.type == "Rectangular Resonant Cavity":
             self.Hz = rectangularResonantCavity(H0=self.Hz, mesh=self.mesh, m=self.m, n=self.n)
