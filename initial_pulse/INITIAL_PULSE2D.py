@@ -24,7 +24,7 @@ class InitialPulse():
         elif self.type == "Non Conformal Rectangular Resonant Cavity":
             self.Hz = rectangularResonantCavityNonConformal(H0=self.Hz, mesh=self.mesh, m=self.m, n=self.n)
         elif self.type == "MagneticY Gaussian":
-            self.Hz = electricYGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
+            self.Hz = magneticYGaussian(H0=self.Hz, mesh=self.mesh, center=self.center, spread=self.spread)
         else:
             raise ValueError('Pulse type not defined')
         return self.Ex, self.Ey, self.Hz
@@ -69,7 +69,7 @@ def rectangularResonantCavityNonConformal(H0, mesh, m, n):
                 initialH[i,j] = np.cos(m*np.pi*(mesh.gridHx[i] - x0 - dx_l)/(a-dx_l-dx_r))*np.cos(n*np.pi*(mesh.gridHy[j] - y0 - dy_b)/(b-dy_b-dy_t))
     return initialH
 
-def electricYGaussian(H0, mesh, center, spread):
+def magneticYGaussian(H0, mesh, center, spread):
     initialH = np.zeros(H0.shape)
     centerX = center[0]
     centerY = center[1]
