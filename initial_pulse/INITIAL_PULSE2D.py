@@ -16,12 +16,13 @@ class InitialPulse():
         self.Ey = np.zeros((self.mesh.gridEx.size, self.mesh.gridEy.size))
         self.Hz = np.zeros((self.mesh.gridHx.size, self.mesh.gridHy.size))
 
-    def illuminationGaussianHy(location, center, amplitude, spread):
+    def illuminationGaussianHy(self, locationX, locationY, center, amplitude, spread):
         def function(t):
             return np.exp( - ((t-center)/spread)**2/2) * amplitude
         
         gaussian_source = {
-            'location': location,
+            'locationx': locationX,
+            'locationy': locationY,
             'function': function
         }
         
