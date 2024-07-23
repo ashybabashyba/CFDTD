@@ -64,10 +64,14 @@ class CFDTD2D():
         self.spread = self.pulse.spread
 
         self.SolverType = solver_type
+        self.sources = []
 
         self.dx = self.mesh.dx
         self.dy = self.mesh.dy
         self.dt = cfl*math.sqrt(self.dx**2 + self.dy**2)/2
+
+    def addSource(self, source):
+        self.sources.append(source)
 
     def buildFields(self):
         Ex = np.zeros((self.mesh.gridEx.size, self.mesh.gridEy.size))
@@ -103,7 +107,10 @@ class CFDTD2D():
                 Hz = magneticFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
             else:
                 Hz = magneticFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dt=self.dt, area=cell_area, left=cell_lengths_left, right=cell_lengths_right, top=cell_lengths_top, bottom=cell_lengths_bottom)
-            
+            for source in self.sources:
+                Hz[source['locationx'], source['locationy']] += source['function'](t + self.dt/2)
+
+
             if self.SolverType == "Non Conformal":
                 Ex, Ey = electricFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area= cell_area,left=cell_lengths_left, bottom=cell_lengths_bottom, xmin_index=xmin, xmax_index=xmax, ymin_index=ymin, ymax_index=ymax)
             else:
