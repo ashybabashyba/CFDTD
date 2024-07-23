@@ -110,3 +110,34 @@ def test_Hy_Gaussian():
     #     plt.grid(which='both')
     #     plt.pause(0.01)  
     #     plt.cla()
+
+def test_Hy_Illumination():
+    node_list = [(5.5,40.5), (94.5,40.5), (94.5, 60.5), (5.5, 60.5)]
+    initial_cell = (50, 50)
+    mesh = Mesh(box_size=100.0, dx=1.0, dy=1.0, external_nodes_list_PEC=node_list, initial_wave_cell=initial_cell)
+    # mesh.plotElectricFieldGrid()
+    xmin, xmax, ymin, ymax = mesh.getMinMaxIndexInsideNonConformalCells()
+
+    pulse = InitialPulse(mesh=mesh, initial_position=initial_cell, spread=20.0)
+    solver = CFDTD2D(mesh, initialPulse=pulse, cfl=0.3)
+
+    for j in range(ymin-1, ymax+2):
+        solver.addSource(pulse.illuminationGaussianHy(locationX=xmin-1, locationY=j, center=10, amplitude=0.5, spread=1))
+
+
+    nsteps = int(100 / solver.dt)
+    solver.plotMagneticFieldAnimation(nsteps)
+
+    # frame = 140 
+    # solver.plotMagneticFieldFrame(frame)
+
+    # nsteps = int(frame*c0/solver.dt/1e9)
+    # probeEx, probeEy, probeHz, probeTime = solver.run(nsteps+1)
+
+    # plt.plot(mesh.gridHx, probeHz[:, 50, nsteps], '.-')
+    # plt.ylim(-2.1, 2.1)
+    # plt.title(f'Time: {probeTime[nsteps]:.2f} [ns]')
+    # plt.xlabel('x coordinate [m]')
+    # plt.ylabel('$H_z$ [A/m]')
+    # plt.grid(which='both')
+    # plt.show()
