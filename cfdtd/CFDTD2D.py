@@ -115,7 +115,10 @@ class CFDTD2D():
                 Ex, Ey = electricFieldStepNonConformal(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area= cell_area,left=cell_lengths_left, bottom=cell_lengths_bottom, xmin_index=xmin, xmax_index=xmax, ymin_index=ymin, ymax_index=ymax)
             else:
                 Ex, Ey = electricFieldStep(Ex_prev=Ex, Ey_prev=Ey, Hz_prev=Hz, dx=self.dx, dy=self.dy, dt=self.dt, area= cell_area,left=cell_lengths_left, bottom=cell_lengths_bottom)
-                   
+            for source in self.sources:
+                Ey[source['locationx'], source['locationy']] += source['function'](t + self.dt - self.dx/2)
+
+
             Ex[ :][ 0] = 0.0
             Ex[ :][-1] = 0.0
             Ey[ 0][ :] = 0.0
