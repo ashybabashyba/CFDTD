@@ -122,17 +122,18 @@ def test_Hy_Illumination():
     solver = CFDTD2D(mesh, initialPulse=pulse, cfl=0.3)
 
     for j in range(ymin-1, ymax+2):
-        solver.addSource(pulse.illuminationGaussianHy(locationX=xmin-1, locationY=j, center=10, amplitude=0.5, spread=1))
+        solver.addSource(pulse.illuminationGaussianHy(locationX=xmin-1, locationY=j, center=20, amplitude=0.5, spread=5))
+        solver.addSource(pulse.illuminationGaussianHy(locationX=xmax+1, locationY=j, center=108, amplitude=-0.5, spread=5))
 
 
-    nsteps = int(100 / solver.dt)
-    solver.plotMagneticFieldAnimation(nsteps)
+    # nsteps = int(100 / solver.dt)
+    # solver.plotMagneticFieldAnimation(nsteps)
 
-    # frame = 140 
+    frame = 450 
     # solver.plotMagneticFieldFrame(frame)
 
-    # nsteps = int(frame*c0/solver.dt/1e9)
-    # probeEx, probeEy, probeHz, probeTime = solver.run(nsteps+1)
+    nsteps = int(frame*c0/solver.dt/1e9)
+    probeEx, probeEy, probeHz, probeTime = solver.run(nsteps+1)
 
     # plt.plot(mesh.gridHx, probeHz[:, 50, nsteps], '.-')
     # plt.ylim(-2.1, 2.1)
@@ -141,3 +142,11 @@ def test_Hy_Illumination():
     # plt.ylabel('$H_z$ [A/m]')
     # plt.grid(which='both')
     # plt.show()
+
+    for i in range(nsteps):
+        plt.plot(mesh.gridHx, probeHz[:, 50, i], '.-', label='Electric Field')
+        plt.title(f'step: {i:.2f}')
+        plt.ylim(-2.5, 2.5)
+        plt.grid(which='both')
+        plt.pause(0.01)  
+        plt.cla()
